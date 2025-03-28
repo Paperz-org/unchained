@@ -5,7 +5,11 @@ import os
 import sys
 import types
 from functools import cached_property
-from typing import List, Type
+from typing import TYPE_CHECKING, List, Type
+
+if TYPE_CHECKING:
+    from ninja import NinjaAPI
+
 
 DEFAULT_SETTINGS = {
     "DEBUG": True,
@@ -49,6 +53,7 @@ DEFAULT_SETTINGS = {
 class Unchained:
     # Initialize all_models as empty, we'll populate it after Django setup
     all_models: List[Type] = []
+    _NinjaAPI: Type["NinjaAPI"]
 
     def __init__(self, settings_path: str | None = None):
         self.urlpatterns: list[str] = []
@@ -93,11 +98,6 @@ class Unchained:
     def _configure_api(self):
         """Configure the API and URL patterns"""
         self.api = self._NinjaAPI()
-        # self.urlpatterns.append(self._path("api/", self.api.urls))
-        # import pprint
-
-        # pprint.pprint(dir(self.api))
-        # pprint.pprint(self.urlpatterns[0].__dict__)
 
     @cached_property
     def app(self):
@@ -116,14 +116,16 @@ class Unchained:
             settings.configure(**DEFAULT_SETTINGS, ROOT_URLCONF=self)
 
     def __getattr__(self, item):
-        if getattr(self.api, item, None):
-            return getattr(self.api, item)
+        attr = getattr(self.api, item, None)
+        if attr:
+            return attr
 
         raise AttributeError(
             f"'{self.__class__.__name__}' object has no attribute '{item}'"
         )
 
     def __call__(self, *args, **kwargs):
+        self._register_api()
         return self.app
 
     def _setup_main_app(self):

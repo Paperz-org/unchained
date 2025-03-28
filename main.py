@@ -18,6 +18,3 @@ def hello(request, name: str = "World"):
 @api.get("/add")
 def add(request, a: int, b: int):
     return {"result": a + b}
-
-
-api._register_api()
