@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["django-ninja>=1.3.0", "uvicorn>=0.34.0"]
+dependencies = [
+    "uvicorn>=0.34.0",
+    "django-ninja@git+ssh://git@github.com/mde-pach/django-ninja.git@master",
+    "ninja-crud@git+ssh://git@github.com/Paperz-org/ninja-crud.git@main",
+]
 
 [build-system]
 requires = ["setuptools>=61.0"]

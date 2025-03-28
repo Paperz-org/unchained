@@ -1,7 +1,6 @@
-print("BEFORE")
+# Need to be first ?
 from .unchained import Unchained
 
-print("AFTER")
 pass
 from . import app, models
 from .settings import DEFAULT

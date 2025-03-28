@@ -1,3 +1,4 @@
+import logging
 from typing import Any, List, Type
 
 from django.db import models
@@ -22,5 +23,5 @@ class MainAppModelMeta(models.base.ModelBase):
         model_class = super().__new__(cls, name, bases, attrs)
         # And register it
         cls.models_registry.append(model_class)
-        print(cls.models_registry)
+        logging.debug(cls.models_registry)
         return model_class

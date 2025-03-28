@@ -1,7 +1,12 @@
 from functools import cached_property
-from typing import List, Type
+from typing import TYPE_CHECKING, List, Type
+
+from ninja import NinjaAPI
 
 from .settings import DEFAULT as DEFAULT_SETTINGS
+
+if TYPE_CHECKING:
+    from .models.base import BaseModel
 
 
 class UnchainedMeta(type):
@@ -18,7 +23,7 @@ class UnchainedMeta(type):
         return new_cls
 
 
-class Unchained(metaclass=UnchainedMeta):
+class Unchained(NinjaAPI, metaclass=UnchainedMeta):
     # Initialize all_models as empty, we'll populate it after Django setup
     all_models: List[Type] = []
     APP_NAME = "unchained.app"
@@ -28,12 +33,14 @@ class Unchained(metaclass=UnchainedMeta):
 
         self._path = path
 
-        from ninja import NinjaAPI
+        # from ninja import NinjaAPI
 
-        self.api = NinjaAPI()
+        # self.api = NinjaAPI()
 
         self.app_config_class: Type | None = None
         self.models: list[Type] = []
+
+        super().__init__()
 
     @cached_property
     def app(self):
@@ -41,15 +48,13 @@ class Unchained(metaclass=UnchainedMeta):
 
         return get_asgi_application()
 
-    def __getattr__(self, item):
-        attr = getattr(self.api, item, None)
-        if attr:
-            return attr
+    def crud(self, model: "BaseModel"):
+        from ninja_crud import CRUDRouter
 
-        raise AttributeError(
-            f"'{self.__class__.__name__}' object has no attribute '{item}'"
-        )
+        router = CRUDRouter(model)
+
+        self.add_router(router.path, router.router)
 
     def __call__(self, *args, **kwargs):
-        self.urlpatterns.append(self._path("api/", self.api.urls))
+        self.urlpatterns.append(self._path("api/", self.urls))
         return self.app

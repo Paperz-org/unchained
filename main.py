@@ -2,20 +2,21 @@ from models import User
 from unchained import Unchained
 
 # Create API instance and set up Django
-api = Unchained()
-
+app = Unchained()
 
 # Define your endpoints
-@api.get("/hello")
+@app.get("/hello")
 def hello(request, name: str = "World"):
     return {"message": f"Hello {name}!"}
 
 
-@api.get("/add")
+@app.get("/add")
 def add(request, a: int, b: int):
     return {"result": a + b}
 
 
-@api.get("/users")
-def get_users(request):
-    return {"users": list(User.objects.all())}
+# @app.get("/users")
+# def get_users(request):
+#     return {"users": list(User.objects.all())}
+
+app.crud(User)

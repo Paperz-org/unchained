@@ -4,7 +4,7 @@ import sys
 from django.core.management import execute_from_command_line
 
 # TODO: make it dynamic
-from main import api
+from main import app
 
 # Initialize Django with a virtual app to avoid circular imports
 
@@ -33,6 +33,12 @@ def startapp():
     execute_from_command_line(sys.argv)
 
 
+def runserver():
+    """Run the server."""
+    sys.argv = ["manage.py", "runserver"]
+    execute_from_command_line(sys.argv)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python db_commands.py [makemigrations|migrate]")
@@ -47,6 +53,8 @@ if __name__ == "__main__":
         showmigrations()
     elif command == "startapp":
         startapp()
+    elif command == "runserver":
+        runserver()
     else:
         print("Unknown command. Use 'makemigrations' or 'migrate'")
         sys.exit(1)
