@@ -52,10 +52,8 @@ class UnchainedMeta(type):
                         def decorated(*func_args, **func_kwargs):
                             func.__signature__ = func_signature
                             injected = inject(func)
-                            # injected.__signature__ = func_signature
                             return injected(*func_args, **func_kwargs)
 
-                        # func.__signature__ = inspect.Signature(parameters)
 
                         return http_method(*decorator_args, **decorator_kwargs)(decorated)
 
