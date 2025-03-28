@@ -1,9 +1,9 @@
 from django.db import models
 
-from models_base import MainModel
+from unchained.models.base import BaseModel
 
 
-class User(MainModel):
+class User(BaseModel):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)

@@ -3,13 +3,15 @@ import sys
 # Import Django modules (now safe after initialization)
 from django.core.management import execute_from_command_line
 
-# Initialize Django with a virtual app to avoid circular imports
+# TODO: make it dynamic
 from main import api
+
+# Initialize Django with a virtual app to avoid circular imports
 
 
 def makemigrations():
     """Create new migrations based on models changes."""
-    sys.argv = ["manage.py", "makemigrations"]
+    sys.argv = ["manage.py", "makemigrations", "app"]
     execute_from_command_line(sys.argv)
 
 

@@ -1,13 +1,8 @@
+from models import User
 from unchained import Unchained
 
 # Create API instance and set up Django
 api = Unchained()
-
-from models import User
-from models_base import MainAppModelMeta
-
-# Register models explicitly
-api.register_model(User)
 
 
 # Define your endpoints
@@ -23,7 +18,4 @@ def add(request, a: int, b: int):
 
 @api.get("/users")
 def get_users(request):
-    return {"users": User.objects.all()}
-
-
-print(MainAppModelMeta.models_registry)
+    return {"users": list(User.objects.all())}
