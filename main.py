@@ -1,4 +1,3 @@
-import inspect
 from typing import Annotated
 
 from fast_depends import Depends
@@ -10,32 +9,12 @@ from unchained import Unchained
 app = Unchained()
 
 
-def dependency() -> str:
-    return "my dependency"
+def other_dependency() -> str:
+    return "other dependency"
 
 
-def toto(func):
-    signature = inspect.signature(func)
-
-    def wrapper(*args, **kwargs):
-        # Filter out parameters with Annotated type
-        filtered_params = {}
-        for name, param in signature.parameters.items():
-            if param.annotation is not inspect.Parameter.empty:
-                if getattr(param.annotation, "__origin__", None) is not Annotated:
-                    filtered_params[name] = param
-            else:
-                filtered_params[name] = param
-
-        # Create new signature without Annotated parameters
-        new_signature = signature.replace(parameters=filtered_params)
-
-        # Apply the new signature to the wrapped function
-        wrapper.__signature__ = new_signature
-
-        return func(*args, **kwargs)
-
-    return wrapper
+def dependency(other_dependency: Annotated[str, Depends(other_dependency)]) -> str:
+    return other_dependency
 
 
 # Define your endpoints

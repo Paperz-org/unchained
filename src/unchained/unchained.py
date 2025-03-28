@@ -42,9 +42,7 @@ class UnchainedMeta(type):
                         parameters = []
                         for _, param in func_signature.parameters.items():
                             annotation = param.annotation
-                            if hasattr(annotation, "__origin__") and get_origin(annotation) is Annotated:
-                                pass
-                            else:
+                            if not (hasattr(annotation, "__origin__") and get_origin(annotation) is Annotated):
                                 parameters.append(param)
 
                         # Update function signature with new parameters
