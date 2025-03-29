@@ -54,4 +54,11 @@ DEFAULT = {
     # Added static files configuration
     "STATIC_URL": "/static/",
     "STATIC_ROOT": os.path.join(_BASE_DIR, "unchained/static"),
+    "JAZZMIN_SETTINGS": {
+        "site_title": "Unchained",
+        "site_header": "Unchained",
+        "site_brand": "Unchained App",
+        "show_ui_builder": True,
+        "dark_mode_theme": "darkly"
+    }
 }

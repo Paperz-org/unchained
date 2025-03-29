@@ -1,0 +1,122 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="DuplicatedCode" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <Languages>
+        <language minSize="66" name="Python" />
+      </Languages>
+    </inspection_tool>
+    <inspection_tool class="Eslint" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="82">
+            <item index="0" class="java.lang.String" itemvalue="httpx" />
+            <item index="1" class="java.lang.String" itemvalue="aiodns" />
+            <item index="2" class="java.lang.String" itemvalue="factory-boy" />
+            <item index="3" class="java.lang.String" itemvalue="pytest-django" />
+            <item index="4" class="java.lang.String" itemvalue="python-dateutil" />
+            <item index="5" class="java.lang.String" itemvalue="lupa" />
+            <item index="6" class="java.lang.String" itemvalue="psycopg2-binary" />
+            <item index="7" class="java.lang.String" itemvalue="pytest-watch" />
+            <item index="8" class="java.lang.String" itemvalue="redis" />
+            <item index="9" class="java.lang.String" itemvalue="python3-saml" />
+            <item index="10" class="java.lang.String" itemvalue="python-magic" />
+            <item index="11" class="java.lang.String" itemvalue="sentry-sdk" />
+            <item index="12" class="java.lang.String" itemvalue="Faker" />
+            <item index="13" class="java.lang.String" itemvalue="stripe" />
+            <item index="14" class="java.lang.String" itemvalue="docutils" />
+            <item index="15" class="java.lang.String" itemvalue="django-multiselectfield" />
+            <item index="16" class="java.lang.String" itemvalue="uvicorn" />
+            <item index="17" class="java.lang.String" itemvalue="pyparsing" />
+            <item index="18" class="java.lang.String" itemvalue="daphne" />
+            <item index="19" class="java.lang.String" itemvalue="beautifulsoup4" />
+            <item index="20" class="java.lang.String" itemvalue="dnspython" />
+            <item index="21" class="java.lang.String" itemvalue="django-import-export" />
+            <item index="22" class="java.lang.String" itemvalue="analytics-python" />
+            <item index="23" class="java.lang.String" itemvalue="gunicorn" />
+            <item index="24" class="java.lang.String" itemvalue="simple-salesforce" />
+            <item index="25" class="java.lang.String" itemvalue="wsproto" />
+            <item index="26" class="java.lang.String" itemvalue="zeep" />
+            <item index="27" class="java.lang.String" itemvalue="moto" />
+            <item index="28" class="java.lang.String" itemvalue="boto3" />
+            <item index="29" class="java.lang.String" itemvalue="paramiko" />
+            <item index="30" class="java.lang.String" itemvalue="parsel" />
+            <item index="31" class="java.lang.String" itemvalue="channels" />
+            <item index="32" class="java.lang.String" itemvalue="aioredis" />
+            <item index="33" class="java.lang.String" itemvalue="django-filter" />
+            <item index="34" class="java.lang.String" itemvalue="pytest-env" />
+            <item index="35" class="java.lang.String" itemvalue="oauth2client" />
+            <item index="36" class="java.lang.String" itemvalue="pylint-django" />
+            <item index="37" class="java.lang.String" itemvalue="pytest-xdist" />
+            <item index="38" class="java.lang.String" itemvalue="django-storages" />
+            <item index="39" class="java.lang.String" itemvalue="requests" />
+            <item index="40" class="java.lang.String" itemvalue="drf-yasg" />
+            <item index="41" class="java.lang.String" itemvalue="pycrypto" />
+            <item index="42" class="java.lang.String" itemvalue="celery" />
+            <item index="43" class="java.lang.String" itemvalue="ipdb" />
+            <item index="44" class="java.lang.String" itemvalue="aio-sf-streaming" />
+            <item index="45" class="java.lang.String" itemvalue="pytest-cov" />
+            <item index="46" class="java.lang.String" itemvalue="pytest-mock" />
+            <item index="47" class="java.lang.String" itemvalue="freezegun" />
+            <item index="48" class="java.lang.String" itemvalue="phonenumberslite" />
+            <item index="49" class="java.lang.String" itemvalue="drf-extra-fields" />
+            <item index="50" class="java.lang.String" itemvalue="djangorestframework" />
+            <item index="51" class="java.lang.String" itemvalue="django-cors-headers" />
+            <item index="52" class="java.lang.String" itemvalue="pygments" />
+            <item index="53" class="java.lang.String" itemvalue="docusign-esign" />
+            <item index="54" class="java.lang.String" itemvalue="tornado" />
+            <item index="55" class="java.lang.String" itemvalue="pytest" />
+            <item index="56" class="java.lang.String" itemvalue="amqp" />
+            <item index="57" class="java.lang.String" itemvalue="Salesforce-FuelSDK" />
+            <item index="58" class="java.lang.String" itemvalue="django-mathfilters" />
+            <item index="59" class="java.lang.String" itemvalue="weasyprint" />
+            <item index="60" class="java.lang.String" itemvalue="ipython" />
+            <item index="61" class="java.lang.String" itemvalue="django-linear-migrations" />
+            <item index="62" class="java.lang.String" itemvalue="channels_redis" />
+            <item index="63" class="java.lang.String" itemvalue="django-debug-toolbar" />
+            <item index="64" class="java.lang.String" itemvalue="django-grappelli" />
+            <item index="65" class="java.lang.String" itemvalue="disposable-email-domains" />
+            <item index="66" class="java.lang.String" itemvalue="watchdog" />
+            <item index="67" class="java.lang.String" itemvalue="social-auth-app-django" />
+            <item index="68" class="java.lang.String" itemvalue="toolz" />
+            <item index="69" class="java.lang.String" itemvalue="django-guardian" />
+            <item index="70" class="java.lang.String" itemvalue="Unidecode" />
+            <item index="71" class="java.lang.String" itemvalue="Django" />
+            <item index="72" class="java.lang.String" itemvalue="pylint" />
+            <item index="73" class="java.lang.String" itemvalue="django-redis" />
+            <item index="74" class="java.lang.String" itemvalue="argon2-cffi" />
+            <item index="75" class="java.lang.String" itemvalue="hashids" />
+            <item index="76" class="java.lang.String" itemvalue="google-api-python-client" />
+            <item index="77" class="java.lang.String" itemvalue="pytz" />
+            <item index="78" class="java.lang.String" itemvalue="pytest-lazy-fixture" />
+            <item index="79" class="java.lang.String" itemvalue="Pillow" />
+            <item index="80" class="java.lang.String" itemvalue="pyjwt" />
+            <item index="81" class="java.lang.String" itemvalue="pandas" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E501" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N803" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="ppn_energy_sp.services.gocardless.requests_manager.post.*" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

@@ -70,6 +70,8 @@ if __name__ == "__main__":
         runserver()
     elif command == "collectstatic":
         collectstatic()
+    elif command == "createsuperuser":
+        createsuperuser()
     else:
         print("Unknown command. Use 'makemigrations' or 'migrate'")
         sys.exit(1)
