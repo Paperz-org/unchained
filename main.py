@@ -1,4 +1,4 @@
-from typing import Annotated, Any
+from typing import Annotated
 
 from django.contrib import admin
 
@@ -12,20 +12,8 @@ admin.site.register(User, UserAdmin)
 admin.site.register(Product, ProductAdmin)
 
 
-class Toto:
-    def __init__(self, a: str):
-        self.a = a
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        return self.a
-
-
 def other_dependency() -> str:
     return "world"
-
-
-def try_other_dependency(a: Annotated[str, Depends(other_dependency)]):
-    return Toto(a)
 
 
 def dependency(other_dependency: Annotated[str, Depends(other_dependency)]) -> str:
