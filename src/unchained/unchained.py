@@ -42,7 +42,10 @@ class UnchainedMeta(type):
                         parameters = []
                         for _, param in func_signature.parameters.items():
                             annotation = param.annotation
-                            if not (hasattr(annotation, "__origin__") and get_origin(annotation) is Annotated):
+                            if not (
+                                hasattr(annotation, "__origin__")
+                                and get_origin(annotation) is Annotated
+                            ):
                                 parameters.append(param)
 
                         # Update function signature with new parameters
@@ -54,8 +57,9 @@ class UnchainedMeta(type):
                             injected = inject(func)
                             return injected(*func_args, **func_kwargs)
 
-
-                        return http_method(*decorator_args, **decorator_kwargs)(decorated)
+                        return http_method(*decorator_args, **decorator_kwargs)(
+                            decorated
+                        )
 
                     return wrapper
 
