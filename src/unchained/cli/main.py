@@ -53,7 +53,7 @@ def runserver(
     # Only import uvicorn when needed
     import uvicorn
 
-    uvicorn.run(app_path_str, host=host, port=port, reload=reload)
+    uvicorn.run(app_path_str, host=host, port=port, reload=reload, factory=True)
 
 
 # Add a helper command that doesn't require Django loading
