@@ -1,11 +1,13 @@
 import functools
 import inspect
 from functools import cached_property
-from typing import TYPE_CHECKING, Annotated, Callable, List, Type, get_origin
+from typing import TYPE_CHECKING, Annotated, Any, Callable, get_origin
 
+from django.db.models import QuerySet
 from fast_depends import inject
 from ninja import NinjaAPI
 
+from .admin import UnchainedAdmin
 from .settings import DEFAULT as DEFAULT_SETTINGS
 
 if TYPE_CHECKING:
@@ -24,9 +26,12 @@ class UnchainedMeta(type):
             attrs[http_method] = cls._create_http_method(http_method)
 
         new_cls = super().__new__(cls, name, bases, attrs)
+
         django_settings.configure(**DEFAULT_SETTINGS, ROOT_URLCONF=new_cls)
         django_setup()
+
         new_cls.urlpatterns = []
+
         return new_cls
 
     @staticmethod
@@ -42,10 +47,7 @@ class UnchainedMeta(type):
                         parameters = []
                         for _, param in func_signature.parameters.items():
                             annotation = param.annotation
-                            if not (
-                                hasattr(annotation, "__origin__")
-                                and get_origin(annotation) is Annotated
-                            ):
+                            if not (hasattr(annotation, "__origin__") and get_origin(annotation) is Annotated):
                                 parameters.append(param)
 
                         # Update function signature with new parameters
@@ -57,9 +59,7 @@ class UnchainedMeta(type):
                             injected = inject(func)
                             return injected(*func_args, **func_kwargs)
 
-                        return http_method(*decorator_args, **decorator_kwargs)(
-                            decorated
-                        )
+                        return http_method(*decorator_args, **decorator_kwargs)(decorated)
 
                     return wrapper
 
@@ -75,22 +75,20 @@ class UnchainedMeta(type):
 
 
 class Unchained(NinjaAPI, metaclass=UnchainedMeta):
-    # Initialize all_models as empty, we'll populate it after Django setup
-    all_models: List[Type] = []
     APP_NAME = "unchained.app"
-    app_config_class: Type | None = None
-    models: list[Type] = []
 
-    def __init__(self):
+    def __init__(
+        self,
+        admin: UnchainedAdmin | None = None,
+        **kwargs,
+    ):
         from django.urls import path
 
         self._path = path
-
-        self.app_config_class = None
-        self.models = []
+        self.admin = admin or UnchainedAdmin()
 
         # Call parent init
-        super().__init__()
+        super().__init__(**kwargs)
 
     @cached_property
     def app(self):
@@ -98,10 +96,31 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
 
         return get_asgi_application()
 
-    def crud(self, model: "BaseModel"):
+    def crud(
+        self,
+        model: "BaseModel",
+        create_schema: Any | None = None,
+        read_schema: Any | None = None,
+        update_schema: Any | None = None,
+        filter_schema: Any | None = None,
+        path: str | None = None,
+        tags: list[str] | None = None,
+        queryset: QuerySet | None = None,
+        operations: str = "CRUD",
+    ):
         from ninja_crud import CRUDRouter  # type: ignore
 
-        router = CRUDRouter(model)
+        router = CRUDRouter(
+            model,
+            create_schema=create_schema,
+            read_schema=read_schema,
+            update_schema=update_schema,
+            filter_schema=filter_schema,
+            path=path,
+            tags=tags,
+            queryset=queryset,
+            operations=operations,
+        )
 
         self.add_router(router.path, router.router)
 
