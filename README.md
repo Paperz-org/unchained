@@ -1,3 +1,5 @@
+![Unchained](assets/logo.png)
+
 # Minimal Django Ninja API
 
 This is a minimal Django application using Django Ninja that runs from a single file. No project setup or app creation required!
