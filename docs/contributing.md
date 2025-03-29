@@ -83,7 +83,7 @@ When making documentation changes:
    ```bash
    mkdocs serve
    ```
-3. Visit http://127.0.0.1:8000 in your browser
+3. Visit http://127.0.0.1:8001 in your browser
 
 ## Getting Help
 
@@ -91,27 +91,3 @@ If you have questions or need help:
 
 - :octicons-issue-opened-16: Open an issue on GitHub
 - :fontawesome-brands-github: Check existing issues and discussions
-
----
-
-<div class="grid cards" markdown>
-
--   :fontawesome-solid-bug:{ .lg .middle } __Report a Bug__
-
-    ---
-
-    Found a bug? Report it on GitHub Issues.
-
--   :material-lightbulb:{ .lg .middle } __Feature Request__
-
-    ---
-
-    Have an idea for a new feature? Let us know!
-
--   :material-file-document:{ .lg .middle } __Improve Docs__
-
-    ---
-
-    Documentation improvements are always welcome.
-
-</div> 

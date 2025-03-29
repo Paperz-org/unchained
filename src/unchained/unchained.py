@@ -78,14 +78,16 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
     # Initialize all_models as empty, we'll populate it after Django setup
     all_models: List[Type] = []
     APP_NAME = "unchained.app"
+    app_config_class: Type | None = None
+    models: list[Type] = []
 
     def __init__(self):
         from django.urls import path
 
         self._path = path
 
-        self.app_config_class: Type | None = None
-        self.models: list[Type] = []
+        self.app_config_class = None
+        self.models = []
 
         # Call parent init
         super().__init__()
@@ -97,7 +99,7 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         return get_asgi_application()
 
     def crud(self, model: "BaseModel"):
-        from ninja_crud import CRUDRouter
+        from ninja_crud import CRUDRouter  # type: ignore
 
         router = CRUDRouter(model)
 

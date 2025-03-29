@@ -3,6 +3,7 @@ site_description: Modern, high-performance Python web framework based on Django 
 site_url: https://unchained-framework.org
 repo_url: https://github.com/yourusername/unchained
 repo_name: Unchained
+dev_addr: 127.0.0.1:8001
 
 theme:
   name: material
