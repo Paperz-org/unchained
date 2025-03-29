@@ -1,7 +1,5 @@
 from typing import Optional
 
-from typer import Exit, echo
-
 
 def find_app_path():
     """
@@ -10,6 +8,9 @@ def find_app_path():
     2. From pyproject.toml [tool.unchained] app_path setting
     3. From .unchained file in the current directory
     4. By searching common patterns in current directory
+
+    Returns:
+        str or None: The detected app path in the format module:instance, or None if not found
     """
     import os
 
@@ -35,7 +36,23 @@ def find_app_path():
 
 
 def get_app_path_arg(value: Optional[str]):
-    """Helper function to get app path with automatic detection"""
+    """
+    Helper function to get app path with automatic detection.
+
+    Tries to detect the app path if not explicitly provided. Exits with an error
+    if the app path cannot be detected automatically.
+
+    Args:
+        value (Optional[str]): The app path value provided by the user, if any
+
+    Returns:
+        str: The resolved app path in the format module:instance
+
+    Raises:
+        Exit: If the app path cannot be detected automatically
+    """
+    from typer import Exit, echo
+
     if value is None:
         detected_path = find_app_path()
         if detected_path is None:
@@ -47,10 +64,26 @@ def get_app_path_arg(value: Optional[str]):
 
 
 def load_app_module(app_path: str):
-    """Load the app module and get the Unchained instance"""
+    """
+    Load the app module and get the Unchained instance.
+
+    Imports the specified module and gets the app instance from it.
+
+    Args:
+        app_path (str): The app path in the format module:instance
+
+    Returns:
+        tuple: A tuple of (module, instance) where module is the imported module
+              and instance is the app instance from that module
+
+    Raises:
+        SystemExit: If the module cannot be imported or the instance doesn't exist
+    """
     # Ensure the current directory is in the Python path
     import importlib
     import sys
+
+    from typer import echo
 
     if "" not in sys.path:
         sys.path.insert(0, "")

@@ -20,7 +20,7 @@ authors = [
 ]
 
 [project.scripts]
-unchained = "unchained.cli:main"
+unchained = "unchained.cli.main:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]

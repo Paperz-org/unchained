@@ -1,20 +1,26 @@
 from typing import Optional
 
-import typer
+from typer import Argument, Typer, echo
 
 from unchained.cli.utils import get_app_path_arg, load_app_module
 
-app = typer.Typer(help="Database management commands")
+app = Typer(help="Database management commands for schema migrations and maintenance")
 
 
-@app.command(name="make")
+@app.command(name="create")
 def makemigration(
-    app_path: Optional[str] = typer.Argument(None, help="Path to the app module and instance (module:instance)"),
-    name: Optional[str] = None,
+    app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
+    name: Optional[str] = Argument(None, help="Name for the migration file (optional)"),
 ):
+    """
+    Create new database migrations based on model changes.
+
+    Detects changes in your models and generates migration files to apply
+    those changes to your database schema. If a name is provided, it will
+    be used as a prefix for the migration file.
+    """
     from unchained.cli.utils import get_app_path_arg, load_app_module
 
-    """Make migrations for database changes"""
     app_path_str = get_app_path_arg(app_path)
 
     # Lazy import django
@@ -26,7 +32,7 @@ def makemigration(
     # Settings should already be configured by the Unchained instance
     # If not configured, this will raise an exception
     if not settings.configured:
-        typer.echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
+        echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
         return
 
     from django.core.management import call_command
@@ -37,11 +43,23 @@ def makemigration(
 
 @app.command(name="apply")
 def migrate(
-    app_path: Optional[str] = typer.Argument(None, help="Path to the app module and instance (module:instance)"),
-    app_label: Optional[str] = None,
-    migration_name: Optional[str] = None,
+    app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
+    app_label: Optional[str] = Argument(
+        None, help="App label to migrate (optional, migrates all apps if not specified)"
+    ),
+    migration_name: Optional[str] = Argument(None, help="Specific migration to apply (optional, requires app_label)"),
 ):
-    """Apply migrations to the database"""
+    """
+    Apply migrations to sync the database with your models.
+
+    Updates your database schema to match your current models and previous
+    migrations. Can target specific apps or migrations if needed.
+
+    Examples:
+      unchained migrations apply                   # Apply all pending migrations
+      unchained migrations apply myapp             # Apply migrations for 'myapp' only
+      unchained migrations apply myapp 0002        # Apply specific migration
+    """
     app_path_str = get_app_path_arg(app_path)
 
     from django.conf import settings
@@ -52,7 +70,7 @@ def migrate(
     # Settings should already be configured by the Unchained instance
     # If not configured, this will raise an exception
     if not settings.configured:
-        typer.echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
+        echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
         return
 
     from django.core.management import call_command
@@ -68,10 +86,18 @@ def migrate(
 
 @app.command(name="show")
 def showmigration(
-    app_path: Optional[str] = typer.Argument(None, help="Path to the app module and instance (module:instance)"),
-    app_label: Optional[str] = None,
+    app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
+    app_label: Optional[str] = Argument(
+        None, help="App label to show migrations for (optional, shows all apps if not specified)"
+    ),
 ):
-    """Show migration status"""
+    """
+    Show the status of all database migrations.
+
+    Displays which migrations have been applied and which are pending,
+    helping you track the state of your database schema. Can be filtered
+    to show information for a specific app.
+    """
     app_path_str = get_app_path_arg(app_path)
 
     from django.conf import settings
@@ -82,7 +108,7 @@ def showmigration(
     # Settings should already be configured by the Unchained instance
     # If not configured, this will raise an exception
     if not settings.configured:
-        typer.echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
+        echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
         return
 
     from django.core.management import call_command
