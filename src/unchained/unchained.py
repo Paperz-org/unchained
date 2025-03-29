@@ -54,7 +54,6 @@ class UnchainedMeta(type):
                             injected = inject(func)
                             return injected(*func_args, **func_kwargs)
 
-
                         return http_method(*decorator_args, **decorator_kwargs)(decorated)
 
                     return wrapper
@@ -100,5 +99,12 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         self.add_router(router.path, router.router)
 
     def __call__(self, *args, **kwargs):
+        from django.conf import settings
+        from django.conf.urls.static import static
+        from django.contrib import admin
+
         self.urlpatterns.append(self._path("api/", self.urls))
+        self.urlpatterns.append(self._path("admin/", admin.site.urls))
+        if settings.DEBUG:
+            self.urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
         return self.app

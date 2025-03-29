@@ -6,6 +6,7 @@ from django.core.management import execute_from_command_line
 # TODO: make it dynamic
 from main import app
 
+print(app)
 # Initialize Django with a virtual app to avoid circular imports
 
 
@@ -39,6 +40,18 @@ def runserver():
     execute_from_command_line(sys.argv)
 
 
+def collectstatic():
+    """Collect static files."""
+    sys.argv = ["manage.py", "collectstatic"]
+    execute_from_command_line(sys.argv)
+
+
+def createsuperuser():
+    """Create a superuser."""
+    sys.argv = ["manage.py", "createsuperuser"]
+    execute_from_command_line(sys.argv)
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python db_commands.py [makemigrations|migrate]")
@@ -55,6 +68,8 @@ if __name__ == "__main__":
         startapp()
     elif command == "runserver":
         runserver()
+    elif command == "collectstatic":
+        collectstatic()
     else:
         print("Unknown command. Use 'makemigrations' or 'migrate'")
         sys.exit(1)

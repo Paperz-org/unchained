@@ -1,3 +1,7 @@
+import os
+
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 DEFAULT = {
     "DEBUG": True,
     "SECRET_KEY": "your-secret-key-here",
@@ -12,11 +16,13 @@ DEFAULT = {
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
     ],
     "INSTALLED_APPS": [
+        "jazzmin",
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.messages",
+        "django.contrib.staticfiles",  # Added staticfiles app
         "unchained.app",
     ],
     "MIGRATION_MODULES": {
@@ -45,4 +51,7 @@ DEFAULT = {
             },
         },
     ],
+    # Added static files configuration
+    "STATIC_URL": "/static/",
+    "STATIC_ROOT": os.path.join(_BASE_DIR, "unchained/static"),
 }

@@ -9,6 +9,7 @@ dependencies = [
     "django-ninja@git+ssh://git@github.com/mde-pach/django-ninja.git@master",
     "ninja-crud@git+ssh://git@github.com/Paperz-org/ninja-crud.git@main",
     "fast-depends>=2.4.12",
+    "django-jazzmin>=3.0.1",
 ]
 
 [build-system]
