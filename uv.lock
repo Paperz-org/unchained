@@ -163,6 +163,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-jazzmin"
+version = "3.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/84/96/21b6255e90d92a3eb4e93bea9376635d54258e0353ebb913a55e40ae9254/django_jazzmin-3.0.1.tar.gz", hash = "sha256:67ae148bade41267a09ca8e4352ddefa6121795ebbac238bb9a6564ff841eb1b", size = 2053550 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ad/5b/2f8c4b168e6c41bf1e4b14d787deb23d80f618f0693db913bbe208a4a907/django_jazzmin-3.0.1-py3-none-any.whl", hash = "sha256:12a0a4c1d4fd09c2eef22acf6a1f03112b515ba695c59faa8ea80efc81c1f21b", size = 2125957 },
+]
+
+[[package]]
 name = "django-ninja"
 version = "1.4.0"
 source = { git = "ssh://git@github.com/mde-pach/django-ninja.git?rev=master#d6f719a764d138ff46e23e35d91823b880ecfee7" }
@@ -951,6 +963,7 @@ name = "unchained"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "django-jazzmin" },
     { name = "django-ninja" },
     { name = "fast-depends" },
     { name = "ninja-crud" },
@@ -979,6 +992,7 @@ doc = [
 
 [package.metadata]
 requires-dist = [
+    { name = "django-jazzmin", specifier = ">=3.0.1" },
     { name = "django-ninja", git = "ssh://git@github.com/mde-pach/django-ninja.git?rev=master" },
     { name = "fast-depends", specifier = ">=2.4.12" },
     { name = "ninja-crud", git = "ssh://git@github.com/Paperz-org/ninja-crud.git?rev=main" },

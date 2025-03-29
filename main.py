@@ -1,11 +1,15 @@
 from typing import Annotated
 
-from models import User
+from django.contrib import admin
+
+from admin import UserAdmin, ProductAdmin
+from models import User, Product
 from unchained import Depends, Unchained
 
 app = Unchained()
 
-
+admin.site.register(User, UserAdmin)
+admin.site.register(Product, ProductAdmin)
 def other_dependency() -> str:
     return "world"
 
