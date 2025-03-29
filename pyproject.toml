@@ -12,6 +12,11 @@ dependencies = [
     "django-jazzmin>=3.0.1",
 ]
 
+authors = [
+    { name = "Paul Brochard", email = "paul.brochard96@gmail.com" },
+    { name = "Maxime De Pachtere", email = "maxime.depachtere@gmail.com" },
+]
+
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
