@@ -10,12 +10,17 @@ dependencies = [
     "ninja-crud@git+ssh://git@github.com/Paperz-org/ninja-crud.git@main",
     "fast-depends>=2.4.12",
     "django-jazzmin>=3.0.1",
+    "typer>=0.15.2",
+    "tomli>=2.2.1",
 ]
 
 authors = [
     { name = "Paul Brochard", email = "paul.brochard96@gmail.com" },
     { name = "Maxime De Pachtere", email = "maxime.depachtere@gmail.com" },
 ]
+
+[project.scripts]
+unchained = "unchained.cli:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]
@@ -47,3 +52,6 @@ doc = [
 
 [tool.mypy]
 files = ["src/"]
+
+[tool.unchained]
+app_path = "main:app"
