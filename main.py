@@ -1,8 +1,15 @@
 from typing import Annotated
 
+from pydantic import BaseModel
+
 from admin import ProductAdmin, UserAdmin
 from models import Product, User
-from unchained import Depends, Unchained
+from unchained import Depends, Request, Unchained
+
+
+class Headers(BaseModel):
+    x_api_key: str | None = None
+
 
 app = Unchained()
 
@@ -14,12 +21,17 @@ def other_dependency() -> str:
     return "world"
 
 
-def dependency(other_dependency: Annotated[str, Depends(other_dependency)]) -> str:
+def dependency(request: Request, other_dependency: Annotated[str, Depends(other_dependency)]) -> str:
+    print(request)
     return other_dependency
 
 
+def dep(request: Request, dependency: Annotated[str, Depends(dependency)]):
+    return "hello"
+
+
 @app.get("/hello/{a}")
-def hello(request, a: str, b: Annotated[str, Depends(dependency)]):
+def hello(a: str, b: Annotated[str, Depends(dep)]):
     return {"message": f"Hello {a} {b} !"}
 
 
