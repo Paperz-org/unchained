@@ -72,6 +72,8 @@ class UnchainedMeta(type):
                                     # If the dependency has a request parameter, we need to remove it
                                     # because we will inject the request parameter later
                                     # We need to update the signature because FastDepends will create a model based on the signature.
+                                    # This operation must be done recursively to update all the dependencies
+                                    # See SignatureUpdater for more details
                                     updater = SignatureUpdater()
                                     updater.update_deep_dependencies(instance)
                                     _with_request_dependency.extend(updater.partialised_dependencies)
