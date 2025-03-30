@@ -5,9 +5,9 @@ from typing import TYPE_CHECKING, Annotated, Any, Callable, get_args, get_origin
 from django.db.models import QuerySet
 from fast_depends import inject
 from fast_depends.dependencies import model
-from fast_depends.library import CustomField
 from ninja import NinjaAPI
 
+from unchained.dependencies.header import BaseCustom
 from unchained.signature import Signature, SignatureUpdater
 
 from .admin import UnchainedAdmin
@@ -53,7 +53,7 @@ class UnchainedMeta(type):
                         # Get the signature of the API function
                         api_func_signature = Signature.from_callable(api_func)
 
-                        for _, param in api_func_signature.parameters.items():
+                        for param_name, param in api_func_signature.parameters.items():
                             param_type = param.annotation
                             if _param_type_is_annotated(param_type):
                                 # If the parameter is Annotated, we need to extract the type and instance
@@ -65,18 +65,21 @@ class UnchainedMeta(type):
                                 # type_ is int
                                 # instance is CustomField(dependency)
                                 type_, instance = get_args(param_type)
-                                if isinstance(instance, CustomField):
+                                if isinstance(instance, BaseCustom):
                                     # Add the type to the CustomField
-                                    setattr(instance, "_annotation_types", type_)
+                                    setattr(instance, "param_name", param_name)
+                                    setattr(instance, "annotation_type", type_)
                                 if isinstance(instance, model.Depends):
                                     # If the dependency has a request parameter, we need to remove it
                                     # because we will inject the request parameter later
                                     # We need to update the signature because FastDepends will create a model based on the signature.
                                     # This operation must be done recursively to update all the dependencies
                                     # See SignatureUpdater for more details
+
                                     updater = SignatureUpdater()
                                     updater.update_deep_dependencies(instance)
                                     _with_request_dependency.extend(updater.partialised_dependencies)
+
                         injected = inject(api_func)
 
                         # Update function signature with new parameters
@@ -85,6 +88,7 @@ class UnchainedMeta(type):
 
                         @functools.wraps(api_func)
                         def decorated(*func_args, **func_kwargs):
+                            api_func.__signature__ = api_func_signature
                             # Get the request parameter
                             request = func_args[0]
 

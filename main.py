@@ -1,10 +1,11 @@
 from typing import Annotated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from admin import ProductAdmin, UserAdmin
 from models import Product, User
 from unchained import Depends, Request, Unchained
+from unchained.dependencies.header import Header
 
 
 class Headers(BaseModel):
@@ -15,6 +16,11 @@ app = Unchained()
 
 app.admin.register(User, UserAdmin)
 app.admin.register(Product, ProductAdmin)
+
+
+class BaseHeader(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    x_api_key: str
 
 
 def other_dependency() -> str:
@@ -39,7 +45,8 @@ def dep(
 
 
 @app.get("/hello/{a}")
-def hello(request: Request, a: str, b: Annotated[str, Depends(dep)]):
+def hello(a: str, b: Annotated[str, Depends(dep)], x_api_key: Annotated[str, Header()]):
+    print(x_api_key)
     return {"message": f"Hello {a} {b} !"}
 
 
