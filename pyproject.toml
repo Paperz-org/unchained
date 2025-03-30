@@ -12,6 +12,7 @@ dependencies = [
     "django-jazzmin>=3.0.1",
     "typer>=0.15.2",
     "tomli>=2.2.1",
+    "pdbpp>=0.10.3",
 ]
 
 authors = [
