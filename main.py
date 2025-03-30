@@ -18,6 +18,7 @@ app.admin.register(Product, ProductAdmin)
 
 
 def other_dependency() -> str:
+    print("other_dependency")
     return "world"
 
 
@@ -26,12 +27,19 @@ def dependency(request: Request, other_dependency: Annotated[str, Depends(other_
     return other_dependency
 
 
-def dep(request: Request, dependency: Annotated[str, Depends(dependency)]):
+def dep(
+    request: Request,
+    dependency: Annotated[str, Depends(dependency)],
+    other_dependency: Annotated[str, Depends(other_dependency)],
+):
+    print(request)
+    print(dependency)
+    print(other_dependency)
     return "hello"
 
 
 @app.get("/hello/{a}")
-def hello(a: str, b: Annotated[str, Depends(dep)]):
+def hello(request: Request, a: str, b: Annotated[str, Depends(dep)]):
     return {"message": f"Hello {a} {b} !"}
 
 

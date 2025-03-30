@@ -73,9 +73,7 @@ class UnchainedMeta(type):
                                     # because we will inject the request parameter later
                                     # We need to update the signature because FastDepends will create a model based on the signature.
                                     updater = SignatureUpdater()
-                                    if api_func_signature.has_request_object:
-                                        updater.register_dependency(instance)
-                                    updater.update_deep_dependencies(api_func_signature)
+                                    updater.update_deep_dependencies(instance)
                                     _with_request_dependency.extend(updater.partialised_dependencies)
                         injected = inject(api_func)
 
