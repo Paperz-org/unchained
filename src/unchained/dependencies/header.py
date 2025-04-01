@@ -9,19 +9,14 @@ from pydantic import BaseModel
 
 class BaseCustom(model.Depends):
     annotation_type: type
+    param_name: str | None = None
 
     def __init__(
         self,
-        dependency: Callable[..., Any] | None = None,
-        *,
         use_cache: bool = True,
         cast: bool = True,
     ) -> None:
-        self.dependency = dependency or self.__call__
-        self.use_cache = use_cache
-        self.cast = cast
-        self.param_name: str | None = None
-        self.annotation_type: type
+        super().__init__(self.__call__, use_cache=use_cache, cast=cast)
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError("This method should be implemented by the subclass")

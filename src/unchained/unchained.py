@@ -7,8 +7,8 @@ from fast_depends import inject
 from fast_depends.dependencies import model
 from ninja import NinjaAPI
 
-from unchained.dependencies.header import BaseCustom
-from unchained.signature import Signature, SignatureUpdater
+from unchained.dependencies.header import BaseCustom  # type: ignore
+from unchained.signature import Signature, SignatureUpdater  # type: ignore
 
 from .admin import UnchainedAdmin
 from .settings import DEFAULT as DEFAULT_SETTINGS
@@ -78,13 +78,17 @@ class UnchainedMeta(type):
 
                                     updater = SignatureUpdater()
                                     updater.update_deep_dependencies(instance)
-                                    _with_request_dependency.extend(updater.partialised_dependencies)
+                                    _with_request_dependency.extend(
+                                        updater.partialised_dependencies
+                                    )
 
                         injected = inject(api_func)
 
                         # Update function signature with new parameters
                         # We remove the annotated parameters from the signature to allow Django Ninja to correctly parse the parameters
-                        api_func.__signature__ = api_func_signature.new_signature_without_annotated()
+                        api_func.__signature__ = (
+                            api_func_signature.new_signature_without_annotated()
+                        )
 
                         @functools.wraps(api_func)
                         def decorated(*func_args, **func_kwargs):
@@ -103,7 +107,9 @@ class UnchainedMeta(type):
                             # This is the API result:
                             return injected(*func_args, **func_kwargs)
 
-                        return http_method(*decorator_args, **decorator_kwargs)(decorated)
+                        return http_method(*decorator_args, **decorator_kwargs)(
+                            decorated
+                        )
 
                     return wrapper
 
@@ -124,6 +130,7 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
     def __init__(
         self,
         admin: UnchainedAdmin | None = None,
+        task_workers: int = 2,
         **kwargs,
     ):
         from django.urls import path
@@ -138,7 +145,16 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
     def app(self):
         from django.core.asgi import get_asgi_application
 
-        return get_asgi_application()
+        # Start the task workers when the app is initialized
+        # self.task_manager.start()
+
+        original_app = get_asgi_application()
+
+        # Wrap the ASGI app to handle cleanup on shutdown
+        async def wrapped_app(scope, receive, send):
+            return await original_app(scope, receive, send)
+
+        return wrapped_app
 
     def crud(
         self,
@@ -176,5 +192,7 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         self.urlpatterns.append(self._path("api/", self.urls))
         self.urlpatterns.append(self._path("admin/", admin.site.urls))
         if settings.DEBUG:
-            self.urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+            self.urlpatterns += static(
+                settings.STATIC_URL, document_root=settings.STATIC_ROOT
+            )
         return self.app

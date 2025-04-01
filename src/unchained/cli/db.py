@@ -2,14 +2,16 @@ from typing import Optional
 
 from typer import Argument, Typer, echo
 
-from unchained.cli.utils import get_app_path_arg, load_app_module
+from unchained.cli.utils import get_app_path_arg, load_app_module  # type: ignore
 
 app = Typer(help="Database management commands for schema migrations and maintenance")
 
 
 @app.command(name="create")
 def makemigration(
-    app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
+    app_path: Optional[str] = Argument(
+        None, help="Path to the app module and instance in the format module:instance"
+    ),
     name: Optional[str] = Argument(None, help="Name for the migration file (optional)"),
 ):
     """
@@ -32,7 +34,9 @@ def makemigration(
     # Settings should already be configured by the Unchained instance
     # If not configured, this will raise an exception
     if not settings.configured:
-        echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
+        echo(
+            "Error: Django settings are not configured. Ensure your app properly configures settings."
+        )
         return
 
     from django.core.management import call_command
@@ -43,11 +47,15 @@ def makemigration(
 
 @app.command(name="apply")
 def migrate(
-    app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
+    app_path: Optional[str] = Argument(
+        None, help="Path to the app module and instance in the format module:instance"
+    ),
     app_label: Optional[str] = Argument(
         None, help="App label to migrate (optional, migrates all apps if not specified)"
     ),
-    migration_name: Optional[str] = Argument(None, help="Specific migration to apply (optional, requires app_label)"),
+    migration_name: Optional[str] = Argument(
+        None, help="Specific migration to apply (optional, requires app_label)"
+    ),
 ):
     """
     Apply migrations to sync the database with your models.
@@ -70,7 +78,9 @@ def migrate(
     # Settings should already be configured by the Unchained instance
     # If not configured, this will raise an exception
     if not settings.configured:
-        echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
+        echo(
+            "Error: Django settings are not configured. Ensure your app properly configures settings."
+        )
         return
 
     from django.core.management import call_command
@@ -86,9 +96,12 @@ def migrate(
 
 @app.command(name="show")
 def showmigration(
-    app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
+    app_path: Optional[str] = Argument(
+        None, help="Path to the app module and instance in the format module:instance"
+    ),
     app_label: Optional[str] = Argument(
-        None, help="App label to show migrations for (optional, shows all apps if not specified)"
+        None,
+        help="App label to show migrations for (optional, shows all apps if not specified)",
     ),
 ):
     """
@@ -108,11 +121,12 @@ def showmigration(
     # Settings should already be configured by the Unchained instance
     # If not configured, this will raise an exception
     if not settings.configured:
-        echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
+        echo(
+            "Error: Django settings are not configured. Ensure your app properly configures settings."
+        )
         return
 
     from django.core.management import call_command
 
     args = [app_label] if app_label else []
     call_command("showmigrations", *args)
-

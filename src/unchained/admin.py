@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
 if TYPE_CHECKING:
-    from unchained.models.base import BaseModel
+    from unchained.models.base import BaseModel  # type: ignore
 
 
 class UnchainedAdmin:

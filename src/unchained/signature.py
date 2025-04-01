@@ -111,7 +111,9 @@ class SignatureUpdater:
             # Create a partial function with the request parameter (with request=None because we will inject it later)
             instance.dependency = partial(instance.dependency, request=None)
             # Update the signature of the dependency
-            instance.dependency.__signature__ = signature.new_signature_without_request()  # type: ignore
+            instance.dependency.__signature__ = (  # type: ignore
+                signature.new_signature_without_request()
+            )  # type: ignore
             # Store the dependency to inject it later
             self.partialised_dependencies.append(instance)
 

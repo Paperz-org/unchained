@@ -32,8 +32,12 @@ DEFAULT = {
     },
     "DATABASES": {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": "db.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "unchained_db",
+            "USER": "postgres",
+            "PASSWORD": "postgres",
+            "HOST": "localhost",
+            "PORT": "5432",
         }
     },
     "TEMPLATES": [
@@ -59,6 +63,6 @@ DEFAULT = {
         "site_header": "Unchained",
         "site_brand": "Unchained App",
         "show_ui_builder": True,
-        "dark_mode_theme": "darkly"
-    }
+        "dark_mode_theme": "darkly",
+    },
 }
