@@ -45,9 +45,14 @@ def dep(
 
 
 @app.get("/hello/{a}")
-def hello(a: str, b: Annotated[str, Depends(dep)], x_api_key: Annotated[str, Header()]):
-    print(x_api_key)
+def hello(a: str, b: Annotated[str, Depends(dep)]):
     return {"message": f"Hello {a} {b} !"}
+
+
+@app.get("/ahello/{a}")
+async def ahello(a: str, b: Annotated[str, Depends(dep)]):
+    return {"message": f"ASYNC Hello {a} {b} !"}
+
 
 
 app.crud(User, operations="CRUD")

@@ -1,3 +1,4 @@
+import asyncio
 import functools
 from functools import cached_property
 from typing import TYPE_CHECKING, Annotated, Any, Callable, get_args, get_origin
@@ -85,9 +86,8 @@ class UnchainedMeta(type):
                         # Update function signature with new parameters
                         # We remove the annotated parameters from the signature to allow Django Ninja to correctly parse the parameters
                         api_func.__signature__ = api_func_signature.new_signature_without_annotated()
-
-                        @functools.wraps(api_func)
-                        def decorated(*func_args, **func_kwargs):
+                        
+                        def _prepare_execution(func_args, func_kwargs):
                             api_func.__signature__ = api_func_signature
                             # Get the request parameter
                             request = func_args[0]
@@ -99,11 +99,24 @@ class UnchainedMeta(type):
                             # Inject the request parameter in all the partials function that have a request parameter
                             for dep in _with_request_dependency:
                                 dep.dependency.keywords["request"] = request
+                                
+                            return func_args, func_kwargs
 
+                        @functools.wraps(api_func)
+                        def decorated(*func_args, **func_kwargs):
+                            func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
                             # This is the API result:
                             return injected(*func_args, **func_kwargs)
 
-                        return http_method(*decorator_args, **decorator_kwargs)(decorated)
+                        @functools.wraps(api_func)
+                        async def adecorated(*func_args, **func_kwargs):
+                            func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
+                            # This is the API result:
+                            return await injected(*func_args, **func_kwargs)
+
+                        return http_method(*decorator_args, **decorator_kwargs)(
+                            adecorated if asyncio.iscoroutinefunction(api_func) else decorated
+                        )
 
                     return wrapper
 
