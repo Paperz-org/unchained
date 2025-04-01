@@ -8,8 +8,7 @@ from unchained import Depends, Request, Unchained
 from unchained.dependencies.header import Header
 from unchained.settings import UnchainedSettings, settings
 
-print(settings.django)
-print(settings.django.COUCOU)
+
 
 
 class Headers(UnchainedSettings):
