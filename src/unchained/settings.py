@@ -2,14 +2,10 @@ import importlib
 import os
 import sys
 from pathlib import Path
-from types import ModuleType
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Self
 
 from pydantic import Field, field_validator
-from pydantic.fields import FieldInfo
-from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
-
-UNCHAINED_SETTINGS_MODULE = os.environ.get("UNCHAINED_SETTINGS_MODULE")
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -78,106 +74,7 @@ DEFAULT: Dict[str, Any] = {
 }
 
 
-class DjangoSettingsSource(PydanticBaseSettingsSource):
-    """
-    A settings source for Pydantic that reads values from a Django settings module.
-    """
-
-    def __init__(self, settings_module: Optional[str] = None):
-        """
-        Initialize the settings source.
-
-        Args:
-            settings_module: The path to the settings module. If None, will try to read
-                             from UNCHAINED_SETTINGS_MODULE environment variable.
-        """
-        self.settings_module = settings_module
-        self._settings_cache = None
-
-    def __call__(self, *args: Any, **kwargs: Any) -> Dict[str, Any]:
-        """
-        Load settings from the Django settings module.
-
-        Returns:
-            Dictionary with the settings values from the Django settings module.
-        """
-        django_settings = self._get_django_settings()
-
-        # Extract all uppercase attributes (following Django's convention)
-        values = {}
-        for key in dir(django_settings):
-            if key.isupper():
-                # Skip STATIC_ROOT since it must not be changed
-                if key == "STATIC_ROOT":
-                    continue
-                values[key] = getattr(django_settings, key)
-
-        return values
-
-    def _get_django_settings(self) -> ModuleType:
-        """Load the Django settings module."""
-        if self.settings_module is None:
-            self.settings_module = os.environ.get("UNCHAINED_SETTINGS_MODULE") or os.environ.get(
-                "DJANGO_SETTINGS_MODULE"
-            )
-
-        if not self.settings_module:
-            raise ValueError(
-                "Settings module not specified. Set UNCHAINED_SETTINGS_MODULE "
-                "environment variable or pass settings_module to DjangoSettingsSource."
-            )
-
-        try:
-            return self._import_settings_module(self.settings_module)
-        except ImportError as e:
-            raise ImportError(f"Could not import settings '{self.settings_module}': {e}")
-
-    def _import_settings_module(self, module_path: str) -> ModuleType:
-        """
-        Import the settings module.
-
-        Args:
-            module_path: The path to the module.
-
-        Returns:
-            The imported module.
-        """
-        # Add the current directory to sys.path if it's not already there
-        original_sys_path = sys.path.copy()
-        if "" not in sys.path:
-            sys.path.insert(0, "")
-
-        try:
-            return importlib.import_module(module_path)
-        finally:
-            # Restore the original sys.path
-            sys.path = original_sys_path
-
-    def get_field_value(self, field: FieldInfo, field_name: str) -> Tuple[Any, str, bool]:
-        """
-        Get value for a field from Django settings.
-
-        Args:
-            field: The field info from Pydantic.
-            field_name: The name of the field.
-
-        Returns:
-            Tuple of (value, source, found) where found is a boolean indicating if the value was found.
-        """
-        # For STATIC_ROOT, always return the fixed value
-        if field_name == "STATIC_ROOT":
-            return FIXED_STATIC_ROOT, "fixed_config", True
-
-        django_settings = self._get_django_settings()
-
-        # Check if the field exists in Django settings
-        if hasattr(django_settings, field_name):
-            return getattr(django_settings, field_name), f"settings:{self.settings_module}", True
-
-        return None, "", False
-
-
-class UnchainedSettings(BaseSettings):
+class DjangoSettings(BaseSettings):
     DEBUG: bool = DEFAULT["DEBUG"]
     SECRET_KEY: str = DEFAULT["SECRET_KEY"]
     ALLOWED_HOSTS: List[str] = DEFAULT["ALLOWED_HOSTS"]
@@ -192,18 +89,37 @@ class UnchainedSettings(BaseSettings):
     JAZZMIN_SETTINGS: Dict[str, Any] = DEFAULT["JAZZMIN_SETTINGS"]
 
     model_config = SettingsConfigDict(
-        env_file=".env",
         extra="allow",
-        env_prefix="UNCHAINED_",
+        case_sensitive=False,
         env_nested_delimiter="__",
-        case_sensitive=True,
     )
 
     @field_validator("INSTALLED_APPS")
     def validate_unchained_settings_module(cls, v: List[str]) -> List[str]:
+        # Ensure unchained.app is in the list
         if "unchained.app" not in v:
             v.append("unchained.app")
         return v
+
+    @field_validator("MIDDLEWARE")
+    def validate_middleware(cls, v: List[str]) -> List[str]:
+        # Merge with default middleware, ensuring no duplicates
+        default_middleware = DEFAULT["MIDDLEWARE"]
+        merged = list(v)  # Create a copy of the input list
+        for middleware in default_middleware:
+            if middleware not in merged:
+                merged.append(middleware)
+        return merged
+
+    @field_validator("INSTALLED_APPS")
+    def validate_installed_apps(cls, v: List[str]) -> List[str]:
+        # Merge with default apps, ensuring no duplicates
+        default_apps = DEFAULT["INSTALLED_APPS"]
+        merged = list(v)  # Create a copy of the input list
+        for app in default_apps:
+            if app not in merged:
+                merged.append(app)
+        return merged
 
     @field_validator("MIGRATION_MODULES")
     def validate_migration_modules(cls, v: Dict[str, str]) -> Dict[str, str]:
@@ -217,28 +133,66 @@ class UnchainedSettings(BaseSettings):
         # Always return the fixed value regardless of what was set
         return FIXED_STATIC_ROOT
 
-    @classmethod
-    def settings_customise_sources(
-        cls,
-        settings_cls: Type[BaseSettings],
-        init_settings: PydanticBaseSettingsSource,
-        env_settings: PydanticBaseSettingsSource,
-        dotenv_settings: PydanticBaseSettingsSource,
-        file_secret_settings: PydanticBaseSettingsSource,
-    ):
-        # The order determines priority - later sources override earlier ones
-        sources = (init_settings, env_settings, dotenv_settings)
+    def add_settings(self, settings: Self):
+        for key, value in settings.model_dump().items():
+            setattr(self, key, value)
 
-        #  Here we should check on pyproject.toml too
-        if os.environ.get("UNCHAINED_SETTINGS_MODULE") or os.environ.get("DJANGO_SETTINGS_MODULE"):
-            return (DjangoSettingsSource(), *sources)
-
-        return sources
-
-    def as_django_dict(self) -> Dict[str, Any]:
-        """Convert settings to a dictionary suitable for Django configuration."""
-        # Return the settings as a dictionary for Django
-        return self.model_dump()
+    def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
+        return {key.upper(): value for key, value in super().model_dump(*args, **kwargs).items()}
 
 
-settings = UnchainedSettings()
+class UnchainedSettings(BaseSettings):
+    SETTINGS_MODULE: str = Field()
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="allow",
+        case_sensitive=False,
+        env_prefix="UNCHAINED_",
+        env_nested_delimiter="__",
+    )
+
+    def add_settings(self, settings: BaseSettings):
+        for key, value in settings.model_dump().items():
+            setattr(self, key, value)
+
+
+def load_settings():
+    _django_future_settings = {}
+    unchained_settings = UnchainedSettings()
+
+    unchained_settings_module = unchained_settings.SETTINGS_MODULE
+    if not unchained_settings_module:
+        return unchained_settings
+
+    original_sys_path = sys.path.copy()
+    if "" not in sys.path:
+        sys.path.insert(0, "")
+
+    try:
+        module = importlib.import_module(unchained_settings_module)
+
+        for attr_name in dir(module):
+            attr_value = getattr(module, attr_name)
+            if issubclass(attr_value, UnchainedSettings):
+                unchained_settings.add_settings(attr_value())
+            elif issubclass(attr_value, DjangoSettings):
+                unchained_settings.django = attr_value()
+            elif attr_name.isupper() and not attr_name.startswith("_") and not attr_name.startswith("DJANGO_"):
+                setattr(unchained_settings, attr_name, attr_value)
+            elif attr_name.isupper() and not attr_name.startswith("_") and attr_name.startswith("DJANGO_"):
+                _django_future_settings.update({attr_name[7:]: attr_value})
+
+    finally:
+        sys.path = original_sys_path
+
+    if not hasattr(unchained_settings, "django"):
+        unchained_settings.django = DjangoSettings()
+
+    for key, value in _django_future_settings.items():
+        setattr(unchained_settings.django, key, value)
+
+    return unchained_settings
+
+
+settings = load_settings()

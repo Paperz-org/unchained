@@ -9,7 +9,6 @@ from ninja import NinjaAPI
 
 from unchained.admin import UnchainedAdmin
 from unchained.dependencies.header import BaseCustom
-from unchained.settings import settings
 from unchained.signature import Signature, SignatureUpdater
 
 if TYPE_CHECKING:
@@ -27,13 +26,14 @@ class UnchainedMeta(type):
         from django import setup as django_setup
         from django.conf import settings as django_settings
 
+        from unchained.settings import settings
+
         # Create HTTP method decorators dynamically before class creation
         for http_method in ["get", "post", "put", "patch", "delete"]:
             attrs[http_method] = cls._create_http_method(http_method)
 
         new_cls = super().__new__(cls, name, bases, attrs)
-        raw_settings = settings.as_django_dict()  # Load settings and configure Django
-        django_settings.configure(**raw_settings, ROOT_URLCONF=new_cls)
+        django_settings.configure(**settings.django.model_dump(), ROOT_URLCONF=new_cls)
         django_setup()
 
         new_cls.urlpatterns = []
