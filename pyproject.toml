@@ -13,6 +13,8 @@ dependencies = [
     "typer>=0.15.2",
     "tomli>=2.2.1",
     "pdbpp>=0.10.3",
+    "pydantic>=2.6.1",
+    "pydantic-settings>=2.8.1",
 ]
 
 authors = [

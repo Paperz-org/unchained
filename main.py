@@ -6,9 +6,13 @@ from admin import ProductAdmin, UserAdmin
 from models import Product, User
 from unchained import Depends, Request, Unchained
 from unchained.dependencies.header import Header
+from unchained.settings import UnchainedSettings, settings
+
+print(settings.django)
+print(settings.django.COUCOU)
 
 
-class Headers(BaseModel):
+class Headers(UnchainedSettings):
     x_api_key: str | None = None
 
 

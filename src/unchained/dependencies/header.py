@@ -1,45 +1,49 @@
-from collections.abc import Callable
-from typing import Any
+from typing import Generic, TypeVar, cast
 
 from django.http import HttpRequest as DjangoHttpRequest
 from fast_depends.dependencies import model
 from ninja.errors import ValidationError
 from pydantic import BaseModel
 
+T = TypeVar("T")
 
-class BaseCustom(model.Depends):
-    annotation_type: type
+
+class BaseCustom(model.Depends, Generic[T]):
+    annotation_type: type[T]
 
     def __init__(
         self,
-        dependency: Callable[..., Any] | None = None,
         *,
         use_cache: bool = True,
         cast: bool = True,
     ) -> None:
-        self.dependency = dependency or self.__call__
+        self.dependency = self.__call__
         self.use_cache = use_cache
         self.cast = cast
         self.param_name: str | None = None
-        self.annotation_type: type
+        self.annotation_type: type[T]
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs) -> T:
         raise NotImplementedError("This method should be implemented by the subclass")
 
 
-class Header(BaseCustom):
+class Header(BaseCustom, Generic[T]):
     def __init__(self, param_name: str | None = None, required: bool = True):
         super().__init__()
         self.param_name = param_name
         self.required = required
+        self.annotation_type: type[T]
 
-    def __call__(self, request: DjangoHttpRequest) -> Any:  # type: ignore
+    def __call__(self, request: DjangoHttpRequest) -> T | None:
         headers = request.headers
+
         if self.param_name and self.param_name in headers:
             if issubclass(self.annotation_type, BaseModel):
-                return self.annotation_type.model_validate(headers)
+                return cast(T, self.annotation_type.model_validate(headers))
             else:
-                return headers[self.param_name]
+                return self.annotation_type(headers[self.param_name])  # type: ignore
 
         if self.required:
             raise ValidationError([{"msg": f"Missing header: {self.param_name}"}])
+
+        return None

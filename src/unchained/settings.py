@@ -1,8 +1,18 @@
+import importlib
 import os
+import sys
+from pathlib import Path
+from typing import Any, Dict, List, Self
 
-_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-DEFAULT = {
+_BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+FIXED_STATIC_ROOT = os.path.join(_BASE_DIR, "unchained/static")
+
+# Original Django settings dictionary
+DEFAULT: Dict[str, Any] = {
     "DEBUG": True,
     "SECRET_KEY": "your-secret-key-here",
     "ALLOWED_HOSTS": ["*"],
@@ -53,12 +63,136 @@ DEFAULT = {
     ],
     # Added static files configuration
     "STATIC_URL": "/static/",
-    "STATIC_ROOT": os.path.join(_BASE_DIR, "unchained/static"),
+    "STATIC_ROOT": FIXED_STATIC_ROOT,
     "JAZZMIN_SETTINGS": {
         "site_title": "Unchained",
         "site_header": "Unchained",
         "site_brand": "Unchained App",
         "show_ui_builder": True,
-        "dark_mode_theme": "darkly"
-    }
+        "dark_mode_theme": "darkly",
+    },
 }
+
+
+class DjangoSettings(BaseSettings):
+    DEBUG: bool = DEFAULT["DEBUG"]
+    SECRET_KEY: str = DEFAULT["SECRET_KEY"]
+    ALLOWED_HOSTS: List[str] = DEFAULT["ALLOWED_HOSTS"]
+    MIDDLEWARE: List[str] = DEFAULT["MIDDLEWARE"]
+    INSTALLED_APPS: List[str] = DEFAULT["INSTALLED_APPS"]
+    MIGRATION_MODULES: Dict[str, str] = DEFAULT["MIGRATION_MODULES"]
+    DATABASES: Dict[str, Dict[str, Any]] = DEFAULT["DATABASES"]
+    TEMPLATES: List[Dict[str, Any]] = DEFAULT["TEMPLATES"]
+    STATIC_URL: str = DEFAULT["STATIC_URL"]
+    # Set a frozen value for STATIC_ROOT that cannot be overridden
+    STATIC_ROOT: str = Field(default=FIXED_STATIC_ROOT, frozen=True)
+    JAZZMIN_SETTINGS: Dict[str, Any] = DEFAULT["JAZZMIN_SETTINGS"]
+
+    model_config = SettingsConfigDict(
+        extra="allow",
+        case_sensitive=False,
+        env_nested_delimiter="__",
+    )
+
+    @field_validator("INSTALLED_APPS")
+    def validate_unchained_settings_module(cls, v: List[str]) -> List[str]:
+        # Ensure unchained.app is in the list
+        if "unchained.app" not in v:
+            v.append("unchained.app")
+        return v
+
+    @field_validator("MIDDLEWARE")
+    def validate_middleware(cls, v: List[str]) -> List[str]:
+        # Merge with default middleware, ensuring no duplicates
+        default_middleware = DEFAULT["MIDDLEWARE"]
+        merged = list(v)  # Create a copy of the input list
+        for middleware in default_middleware:
+            if middleware not in merged:
+                merged.append(middleware)
+        return merged
+
+    @field_validator("INSTALLED_APPS")
+    def validate_installed_apps(cls, v: List[str]) -> List[str]:
+        # Merge with default apps, ensuring no duplicates
+        default_apps = DEFAULT["INSTALLED_APPS"]
+        merged = list(v)  # Create a copy of the input list
+        for app in default_apps:
+            if app not in merged:
+                merged.append(app)
+        return merged
+
+    @field_validator("MIGRATION_MODULES")
+    def validate_migration_modules(cls, v: Dict[str, str]) -> Dict[str, str]:
+        if "app" not in v:
+            v["app"] = "migrations"
+        return v
+
+    # Force STATIC_ROOT to always have the fixed value
+    @field_validator("STATIC_ROOT")
+    def validate_static_root(cls, v: str) -> str:
+        # Always return the fixed value regardless of what was set
+        return FIXED_STATIC_ROOT
+
+    def add_settings(self, settings: Self):
+        for key, value in settings.model_dump().items():
+            setattr(self, key, value)
+
+    def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
+        return {key.upper(): value for key, value in super().model_dump(*args, **kwargs).items()}
+
+
+class UnchainedSettings(BaseSettings):
+    SETTINGS_MODULE: str = Field()
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="allow",
+        case_sensitive=False,
+        env_prefix="UNCHAINED_",
+        env_nested_delimiter="__",
+    )
+
+    def add_settings(self, settings: BaseSettings):
+        for key, value in settings.model_dump().items():
+            setattr(self, key, value)
+
+
+def load_settings():
+    _django_future_settings = {}
+    unchained_settings = UnchainedSettings()
+
+    unchained_settings_module = unchained_settings.SETTINGS_MODULE
+    if not unchained_settings_module:
+        return unchained_settings
+
+    original_sys_path = sys.path.copy()
+    if "" not in sys.path:
+        sys.path.insert(0, "")
+
+    try:
+        module = importlib.import_module(unchained_settings_module)
+
+        for attr_name in dir(module):
+            attr_value = getattr(module, attr_name)
+            if issubclass(attr_value, UnchainedSettings):
+                unchained_settings.add_settings(attr_value())
+            elif issubclass(attr_value, DjangoSettings):
+                unchained_settings.django = attr_value()
+            elif attr_name.isupper() and not attr_name.startswith("_") and not attr_name.startswith("DJANGO_"):
+                setattr(unchained_settings, attr_name, attr_value)
+            elif attr_name.isupper() and not attr_name.startswith("_") and attr_name.startswith("DJANGO_"):
+                _django_future_settings.update({attr_name[7:]: attr_value})
+
+    finally:
+        sys.path = original_sys_path
+
+    if not hasattr(unchained_settings, "django"):
+        unchained_settings.django = DjangoSettings()
+
+    for key, value in _django_future_settings.items():
+        setattr(unchained_settings.django, key, value)
+
+    return unchained_settings
+
+
+settings = load_settings()
