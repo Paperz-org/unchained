@@ -43,6 +43,8 @@ class UnchainedMeta(type):
     @staticmethod
     def _create_http_method(http_method_name: str) -> Callable:
         """Factory to create HTTP method handlers with proper signature."""
+        #TODO: we have a perfomance issue: we are creating partial functions for each reference to a dependency.
+        # We should use only one partial function per dependency that need it.
         _with_request_dependency = []
 
         def method(self, *args, **kwargs):
