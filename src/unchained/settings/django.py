@@ -1,6 +1,4 @@
-import importlib
 import os
-import sys
 from pathlib import Path
 from typing import Any, Dict, List, Self
 
@@ -139,60 +137,3 @@ class DjangoSettings(BaseSettings):
 
     def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         return {key.upper(): value for key, value in super().model_dump(*args, **kwargs).items()}
-
-
-class UnchainedSettings(BaseSettings):
-    SETTINGS_MODULE: str = Field()
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        extra="allow",
-        case_sensitive=False,
-        env_prefix="UNCHAINED_",
-        env_nested_delimiter="__",
-    )
-
-    def add_settings(self, settings: BaseSettings):
-        for key, value in settings.model_dump().items():
-            setattr(self, key, value)
-
-
-def load_settings():
-    _django_future_settings = {}
-    unchained_settings = UnchainedSettings()
-
-    unchained_settings_module = unchained_settings.SETTINGS_MODULE
-    if not unchained_settings_module:
-        return unchained_settings
-
-    original_sys_path = sys.path.copy()
-    if "" not in sys.path:
-        sys.path.insert(0, "")
-
-    try:
-        module = importlib.import_module(unchained_settings_module)
-
-        for attr_name in dir(module):
-            attr_value = getattr(module, attr_name)
-            if issubclass(attr_value, UnchainedSettings):
-                unchained_settings.add_settings(attr_value())
-            elif issubclass(attr_value, DjangoSettings):
-                unchained_settings.django = attr_value()
-            elif attr_name.isupper() and not attr_name.startswith("_") and not attr_name.startswith("DJANGO_"):
-                setattr(unchained_settings, attr_name, attr_value)
-            elif attr_name.isupper() and not attr_name.startswith("_") and attr_name.startswith("DJANGO_"):
-                _django_future_settings.update({attr_name[7:]: attr_value})
-
-    finally:
-        sys.path = original_sys_path
-
-    if not hasattr(unchained_settings, "django"):
-        unchained_settings.django = DjangoSettings()
-
-    for key, value in _django_future_settings.items():
-        setattr(unchained_settings.django, key, value)
-
-    return unchained_settings
-
-
-settings = load_settings()
