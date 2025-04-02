@@ -28,34 +28,40 @@ def load_settings() -> UnchainedSettings:
     unchained_settings = UnchainedSettings()
 
     unchained_settings_module = unchained_settings.SETTINGS_MODULE
-    if not unchained_settings_module:
-        return unchained_settings
+    if unchained_settings_module:
+        original_sys_path = sys.path.copy()
+        if "" not in sys.path:
+            sys.path.insert(0, "")
 
-    original_sys_path = sys.path.copy()
-    if "" not in sys.path:
-        sys.path.insert(0, "")
+        try:
+            module = importlib.import_module(unchained_settings_module)
 
-    try:
-        module = importlib.import_module(unchained_settings_module)
+            for attr_name in dir(module):
+                attr_value = getattr(module, attr_name)
+                if issubclass(attr_value, UnchainedSettings):
+                    unchained_settings.add_settings(attr_value())
+                elif issubclass(attr_value, DjangoSettings):
+                    setattr(unchained_settings, "django", attr_value())
+                elif (
+                    attr_name.isupper()
+                    and not attr_name.startswith("_")
+                    and not attr_name.startswith("DJANGO_")
+                ):
+                    setattr(unchained_settings, attr_name, attr_value)
+                elif (
+                    attr_name.isupper()
+                    and not attr_name.startswith("_")
+                    and attr_name.startswith("DJANGO_")
+                ):
+                    _django_future_settings.update({attr_name[7:]: attr_value})
 
-        for attr_name in dir(module):
-            attr_value = getattr(module, attr_name)
-            if issubclass(attr_value, UnchainedSettings):
-                unchained_settings.add_settings(attr_value())
-            elif issubclass(attr_value, DjangoSettings):
-                unchained_settings.django = attr_value()
-            elif attr_name.isupper() and not attr_name.startswith("_") and not attr_name.startswith("DJANGO_"):
-                setattr(unchained_settings, attr_name, attr_value)
-            elif attr_name.isupper() and not attr_name.startswith("_") and attr_name.startswith("DJANGO_"):
-                _django_future_settings.update({attr_name[7:]: attr_value})
-
-    finally:
-        sys.path = original_sys_path
+        finally:
+            sys.path = original_sys_path
 
     if not hasattr(unchained_settings, "django"):
-        unchained_settings.django = DjangoSettings()
+        setattr(unchained_settings, "django", DjangoSettings())
 
     for key, value in _django_future_settings.items():
-        setattr(unchained_settings.django, key, value)
+        setattr(unchained_settings.django, key, value)  # type: ignore
 
     return unchained_settings

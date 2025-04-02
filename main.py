@@ -9,8 +9,6 @@ from unchained.dependencies.header import Header
 from unchained.settings import UnchainedSettings, settings
 
 
-
-
 class Headers(UnchainedSettings):
     x_api_key: str | None = None
 
@@ -27,12 +25,10 @@ class BaseHeader(BaseModel):
 
 
 def other_dependency() -> str:
-    print("other_dependency")
     return "world"
 
 
 def dependency(request: Request, other_dependency: Annotated[str, Depends(other_dependency)]) -> str:
-    print(request)
     return other_dependency
 
 
@@ -41,9 +37,6 @@ def dep(
     dependency: Annotated[str, Depends(dependency)],
     other_dependency: Annotated[str, Depends(other_dependency)],
 ):
-    print(request)
-    print(dependency)
-    print(other_dependency)
     return "hello"
 
 
@@ -55,7 +48,6 @@ def hello(a: str, b: Annotated[str, Depends(dep)]):
 @app.get("/ahello/{a}")
 async def ahello(a: str, b: Annotated[str, Depends(dep)]):
     return {"message": f"ASYNC Hello {a} {b} !"}
-
 
 
 app.crud(User, operations="CRUD")

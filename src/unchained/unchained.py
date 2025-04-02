@@ -44,7 +44,7 @@ class UnchainedMeta(type):
     @staticmethod
     def _create_http_method(http_method_name: str) -> Callable:
         """Factory to create HTTP method handlers with proper signature."""
-        #TODO: we have a perfomance issue: we are creating partial functions for each reference to a dependency.
+        # TODO: we have a perfomance issue: we are creating partial functions for each reference to a dependency.
         # We should use only one partial function per dependency that need it.
         _with_request_dependency = []
 
@@ -80,14 +80,18 @@ class UnchainedMeta(type):
 
                                     updater = SignatureUpdater()
                                     updater.update_deep_dependencies(instance)
-                                    _with_request_dependency.extend(updater.partialised_dependencies)
+                                    _with_request_dependency.extend(
+                                        updater.partialised_dependencies
+                                    )
 
                         injected = inject(api_func)
 
                         # Update function signature with new parameters
                         # We remove the annotated parameters from the signature to allow Django Ninja to correctly parse the parameters
-                        api_func.__signature__ = api_func_signature.new_signature_without_annotated()
-                        
+                        api_func.__signature__ = (
+                            api_func_signature.new_signature_without_annotated()
+                        )
+
                         def _prepare_execution(func_args, func_kwargs):
                             api_func.__signature__ = api_func_signature
                             # Get the request parameter
@@ -100,23 +104,29 @@ class UnchainedMeta(type):
                             # Inject the request parameter in all the partials function that have a request parameter
                             for dep in _with_request_dependency:
                                 dep.dependency.keywords["request"] = request
-                                
+
                             return func_args, func_kwargs
 
                         @functools.wraps(api_func)
                         def decorated(*func_args, **func_kwargs):
-                            func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
+                            func_args, func_kwargs = _prepare_execution(
+                                func_args, func_kwargs
+                            )
                             # This is the API result:
                             return injected(*func_args, **func_kwargs)
 
                         @functools.wraps(api_func)
                         async def adecorated(*func_args, **func_kwargs):
-                            func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
+                            func_args, func_kwargs = _prepare_execution(
+                                func_args, func_kwargs
+                            )
                             # This is the API result:
                             return await injected(*func_args, **func_kwargs)
 
                         return http_method(*decorator_args, **decorator_kwargs)(
-                            adecorated if asyncio.iscoroutinefunction(api_func) else decorated
+                            adecorated
+                            if asyncio.iscoroutinefunction(api_func)
+                            else decorated
                         )
 
                     return wrapper
@@ -190,5 +200,7 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         self.urlpatterns.append(self._path("api/", self.urls))
         self.urlpatterns.append(self._path("admin/", admin.site.urls))
         if settings.DEBUG:
-            self.urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+            self.urlpatterns += static(
+                settings.STATIC_URL, document_root=settings.STATIC_ROOT
+            )
         return self.app
