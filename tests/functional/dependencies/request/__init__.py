@@ -1,6 +1,9 @@
 """Tests for request-based dependencies functionality."""
 
 # Path constant for routes
-PATH = "/request-dependency"
+REQUEST_DEPENDENCY_PATH = "/request-dependency"
+REQUEST_ROUTE_PATH = "/request-route"
+REQUEST_ROUTE_WITHOUT_REQUEST_PATH = "/request-route-without-request"
+REQUEST_ROUTE_WITH_BOTH_REQUEST_AND_DEPENDENCY_PATH = "/request-route-with-both-request-and-dependency"
 
-# No specific constants needed for request tests
+DEFAULT_RETURN_VALUE = "default_return_value"

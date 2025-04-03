@@ -5,17 +5,14 @@ import pytest
 from tests.functional import SUPPORTED_HTTP_METHODS
 from tests.functional.dependencies.header import PATH, TEST_HEADER_VALUE
 from tests.utils.client import UnchainedAsyncTestClient
-from unchained import Depends, Unchained
+from unchained import Unchained
 from unchained.dependencies.header import Header
 
 
 @pytest.fixture
 def client(app: Unchained, async_test_client: UnchainedAsyncTestClient) -> UnchainedAsyncTestClient:
-    async def header_dependency(x_api_key: Annotated[str, Header()]) -> str:
+    async def header_dependency_route(x_api_key: Annotated[str, Header()]) -> str:
         return x_api_key
-
-    async def header_dependency_route(header_value: Annotated[str, Depends(header_dependency)]) -> str:
-        return header_value
 
     for method in SUPPORTED_HTTP_METHODS:
         getattr(app, method)(PATH)(header_dependency_route)
