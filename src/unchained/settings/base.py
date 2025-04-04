@@ -69,6 +69,6 @@ def load_settings() -> UnchainedSettings:
         unchained_settings.django = DefaultDjangoSettings()
 
     for key, value in _django_future_settings.items():
-        setattr(unchained_settings.django, key, value)
+        setattr(unchained_settings.django, key, value)  # type: ignore
 
     return unchained_settings

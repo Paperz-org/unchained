@@ -10,9 +10,7 @@ from unchained.meta import URLPatterns, UnchainedMeta
 
 if TYPE_CHECKING:
     from .models.base import BaseModel
-
-
-
+ 
 class Unchained(NinjaAPI, metaclass=UnchainedMeta):
     APP_NAME = "unchained.app"
     urlpatterns = URLPatterns()

@@ -1,12 +1,14 @@
+import inspect
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict
 
 from admin import ProductAdmin, UserAdmin
 from models import Product, User
+from test_router import router
 from unchained import Depends, Request, Unchained
 from unchained.settings import UnchainedSettings
-from test_router import router
+
 
 class Headers(UnchainedSettings):
     x_api_key: str | None = None
@@ -20,12 +22,10 @@ app.admin.register(User, UserAdmin)
 app.admin.register(Product, ProductAdmin)
 
 def other_dependency() -> str:
-    print("other_dependency")
     return "world"
 
 
 def dependency(request: Request, other_dependency: Annotated[str, Depends(other_dependency)]) -> str:
-    print(request)
     return other_dependency
 
 
@@ -34,9 +34,6 @@ def dep(
     dependency: Annotated[str, Depends(dependency)],
     other_dependency: Annotated[str, Depends(other_dependency)],
 ):
-    print(request)
-    print(dependency)
-    print(other_dependency)
     return "hello"
 
 
