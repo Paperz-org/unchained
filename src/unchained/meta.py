@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import functools
 from typing import Callable, get_args
 
@@ -21,8 +22,15 @@ class UnchainedBaseMeta(type):
             def _create_injected_decorator(http_method):
                 def decorator(*decorator_args, **decorator_kwargs):
                     def wrapper(api_func):
+                        if hasattr(api_func, "_original_api_func"):
+                            api_func = api_func._original_api_func
+
+                        
                         # Get the signature of the API function
                         api_func_signature = Signature.from_callable(api_func)
+                        # TODO msut work but ????????????????????????????????????
+                        # _original_signature = Signature.from_callable(api_func)
+                        _original_signature = copy.deepcopy(api_func_signature)
 
                         for param_name, param in api_func_signature.parameters.items():
                             if Signature.param_is_annotated(param):
@@ -49,7 +57,7 @@ class UnchainedBaseMeta(type):
                                     updater = SignatureUpdater()
                                     updater.update_deep_dependencies(instance)
                                     _with_request_dependency.extend(updater.partialised_dependencies)
-
+                        
                         injected = inject(api_func)
 
                         # Update function signature with new parameters
@@ -64,10 +72,10 @@ class UnchainedBaseMeta(type):
                             # If the API function doesn't have a request parameter, we remove it from the arguments
                             if not api_func_signature.has_request_object:
                                 func_args = func_args[1:]
-
                             # Inject the request parameter in all the partials function that have a request parameter
                             for dep in _with_request_dependency:
                                 dep.dependency.keywords["request"] = request
+
 
                             return func_args, func_kwargs
 
@@ -83,11 +91,15 @@ class UnchainedBaseMeta(type):
                         async def adecorated(*func_args, **func_kwargs):
                             func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
                             # This is the API result:
-                            return await injected(*func_args, **func_kwargs)
-
-                        return http_method(*decorator_args, **decorator_kwargs)(
+                            res = await injected(*func_args, **func_kwargs)
+                            return res
+    
+                        result = http_method(*decorator_args, **decorator_kwargs)(
                             adecorated if asyncio.iscoroutinefunction(api_func) else decorated
                         )
+                        api_func.__signature__ = _original_signature
+                        result._original_api_func = api_func
+                        return result
 
                     return wrapper
 
@@ -133,4 +145,5 @@ class UnchainedMeta(UnchainedBaseMeta):
 
         new_cls.urlpatterns = []
 
+        return new_cls
         return new_cls

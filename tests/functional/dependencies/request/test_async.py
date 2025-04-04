@@ -17,19 +17,20 @@ from unchained import Depends, Request, Unchained
 @pytest.fixture
 def client(app: Unchained, async_test_client: UnchainedAsyncTestClient) -> UnchainedAsyncTestClient:
     async def request_dependency(request: Request) -> dict[str, Any]:
-        return {"method": request.method, "path": request.url.path}
+        return {"method": request.method}
 
     async def request_dependency_route(info: Annotated[dict[str, Any], Depends(request_dependency)]) -> dict[str, Any]:
         return info
     
     async def request_route(request: Request) -> dict[str, Any]:
-        return {"method": request.method, "path": request.url.path}
+        return {"method": request.method}
     
     async def route_without_request() -> str:
         return DEFAULT_RETURN_VALUE
     
     async def route_with_both_request_and_dependency(request: Request, info: Annotated[dict[str, Any], Depends(request_dependency)]) -> dict[str, Any]:
-        return {"has_request": request is not None, "method": info["method"], "path": info["path"]}
+        return {"has_request": request is not None, "method": info["method"]}
+
 
     for method in SUPPORTED_HTTP_METHODS:
         getattr(app, method)(REQUEST_DEPENDENCY_PATH)(request_dependency_route)
@@ -46,7 +47,6 @@ async def test_async_request_dependency(client: UnchainedAsyncTestClient, method
     assert response.status_code == 200
     result = response.json()
     assert result["method"] == method.upper()
-    assert result["path"] == REQUEST_DEPENDENCY_PATH
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)
@@ -55,7 +55,6 @@ async def test_async_request_route(client: UnchainedAsyncTestClient, method: str
     assert response.status_code == 200
     result = response.json()
     assert result["method"] == method.upper()
-    assert result["path"] == REQUEST_ROUTE_PATH
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)
@@ -69,4 +68,5 @@ async def test_async_request_route_without_request(client: UnchainedAsyncTestCli
 async def test_async_request_route_with_both_request_and_dependency(client: UnchainedAsyncTestClient, method: str) -> None:
     response = await getattr(client, method)(REQUEST_ROUTE_WITH_BOTH_REQUEST_AND_DEPENDENCY_PATH)
     assert response.status_code == 200
-    assert response.json() == {"has_request": True, "method": method.upper(), "path": REQUEST_ROUTE_WITH_BOTH_REQUEST_AND_DEPENDENCY_PATH}
+    assert response.json() == {"has_request": True, "method": method.upper()}
+

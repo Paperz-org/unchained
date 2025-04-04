@@ -15,7 +15,6 @@ from ...utils.client import UnchainedAsyncTestClient, UnchainedTestClient
 def app() -> Unchained:
     """Create a new Unchained app instance for tests."""
     app = Unchained()
-    # app()
     return app
 
 

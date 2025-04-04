@@ -1,3 +1,4 @@
+import inspect
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict
