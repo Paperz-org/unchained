@@ -4,9 +4,9 @@ from pydantic import BaseModel, ConfigDict
 
 from admin import ProductAdmin, UserAdmin
 from models import Product, User
+from test_router import router
 from unchained import Depends, Request, Unchained
-from unchained.dependencies.header import Header
-from unchained.settings import UnchainedSettings, settings
+from unchained.settings import UnchainedSettings
 
 
 class Headers(UnchainedSettings):
@@ -14,6 +14,8 @@ class Headers(UnchainedSettings):
 
 
 app = Unchained()
+
+app.add_router("/router", router)
 
 app.admin.register(User, UserAdmin)
 app.admin.register(Product, ProductAdmin)

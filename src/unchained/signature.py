@@ -13,9 +13,9 @@ class Signature(inspect.Signature):
         Check if the signature has a request parameter (HttpRequest from Django).
         """
         for param_name, param in self.parameters.items():
-            if self._param_is_annotated(param):
+            if self.param_is_annotated(param):
                 continue
-            if self._param_is_request(param) or param_name == "request":
+            if self.param_is_request(param) or param_name == "request":
                 return True
 
         return False
@@ -26,10 +26,10 @@ class Signature(inspect.Signature):
         """
         parameters = []
         for _, param in self.parameters.items():
-            if self._param_is_annotated(param):
+            if self.param_is_annotated(param):
                 parameters.append(param)
                 continue
-            if self._param_is_request(param):
+            if self.param_is_request(param):
                 continue
             parameters.append(param)
 
@@ -43,20 +43,27 @@ class Signature(inspect.Signature):
         """
         parameters = []
         for _, param in self.parameters.items():
-            if self._param_is_annotated(param):
+            if self.param_is_annotated(param):
                 continue
             parameters.append(param)
 
         return Signature(parameters)
 
     @staticmethod
-    def _param_is_annotated(param: Any) -> bool:
+    def param_is_annotated(param: Any) -> bool:
         annotation = param.annotation
         return hasattr(annotation, "__origin__") and get_origin(annotation) is Annotated
 
     @staticmethod
-    def _param_is_request(param: Any) -> bool:
+    def param_is_request(param: Any) -> bool:
         return issubclass(param.annotation, HttpRequest)
+
+    @classmethod
+    def param_is_depends(cls, param: Any) -> bool:
+        if cls.param_is_annotated(param):
+            _, instance = get_args(param.annotation)
+            return isinstance(instance, model.Depends)
+        return False
 
 
 class SignatureUpdater:
@@ -81,26 +88,6 @@ class SignatureUpdater:
     def __init__(self):
         self.partialised_dependencies: list[model.Depends] = []
 
-    @staticmethod
-    def _param_is_annotated(param: Any) -> bool:
-        annotation = param.annotation
-        return hasattr(annotation, "__origin__") and get_origin(annotation) is Annotated
-
-    def _param_is_depends(self, param: Any) -> bool:
-        """
-        Function to check if the parameter is a Depends.
-        First we check if the parameter is annotated with Annotated.
-        If it is, we check if the instance is a Depends.
-        If it is not, we return False.
-
-        Exemple:
-            def dependency(a: Annotated[str, Depends(other_dependency)])
-        """
-        if self._param_is_annotated(param):
-            _, instance = get_args(param.annotation)
-            return isinstance(instance, model.Depends)
-        return False
-
     def update_deep_dependencies(self, instance: model.Depends):
         # Get the signature of the dependency
         signature = Signature.from_callable(instance.dependency)
@@ -118,7 +105,7 @@ class SignatureUpdater:
         # We check all the dependencies of the current signature
         for _, param in signature.parameters.items():
             # If the dependency is not a Depends, we skip it
-            if not self._param_is_depends(param):
+            if not Signature.param_is_depends(param):
                 continue
             # If the dependency is a Depends, we call the function recursively to update the signature of the dependency and
             # create the partial function if needed.
