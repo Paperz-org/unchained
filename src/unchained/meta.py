@@ -112,9 +112,17 @@ class UnchainedRouterMeta(UnchainedBaseMeta):
             setattr(new_cls, http_method, cls._create_http_method(http_method, new_cls))
         return new_cls
 
+class URLPatterns(list):
+    
+    def add(self, value):
+        if isinstance(value, list):
+            self.extend(value)
+        else:
+            self.append(value)
+
 
 class UnchainedMeta(UnchainedBaseMeta):
-    urlpatterns: list[str]
+    urlpatterns = URLPatterns()
 
     def __new__(cls, name, bases, attrs):
         from django import setup as django_setup
@@ -128,9 +136,8 @@ class UnchainedMeta(UnchainedBaseMeta):
         for http_method in ["get", "post", "put", "patch", "delete"]:
             setattr(new_cls, http_method, cls._create_http_method(http_method, new_cls))
 
-        django_settings.configure(**settings.django.model_dump(), ROOT_URLCONF=new_cls)
+        breakpoint()
+        django_settings.configure(**settings.django.get_settings(), ROOT_URLCONF=new_cls)
         django_setup()
-
-        new_cls.urlpatterns = []
 
         return new_cls

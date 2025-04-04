@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple, Any
 
 from typer import Argument, Option, Typer, echo
 
@@ -7,6 +7,24 @@ from unchained.cli.db import app as db_app
 # Enhanced help text for the main app
 app = Typer(name="unchained", help="Unchained CLI tool - A modern web framework for building Python web applications")
 app.add_typer(db_app, name="migrations", help="Database migration commands for managing your application's schema")
+
+
+def _load_app(app_path: Optional[str] = None) -> Tuple[str, Any, Any]:
+    """
+    Load the application from the given path or detect it automatically.
+    
+    Returns:
+        Tuple containing:
+        - app_path_str: The string representation of the app path
+        - module: The imported module
+        - instance: The app instance from the module
+    """
+    from unchained.cli.utils import get_app_path_arg, load_app_module
+    
+    path = get_app_path_arg(app_path)
+    module, instance = load_app_module(path)
+    
+    return path, module, instance
 
 
 @app.command(name="start")
@@ -25,37 +43,24 @@ def runserver(
     2. pyproject.toml [tool.unchained] settings
     3. Common app patterns in current directory
     """
-    import importlib
-    import sys
-
-    from unchained.cli.utils import get_app_path_arg
-
-    app_path_str = get_app_path_arg(app_path)
-
-    # Ensure the current directory is in the Python path
-    if "" not in sys.path:
-        sys.path.insert(0, "")
-
-    # Parse the app_path
-    module_path, app_instance = app_path_str.split(":", 1)
-
-    # Check if module exists before running uvicorn
-    try:
-        # Just try to import to verify it exists
-        if module_path.endswith(".py"):
-            # If it's a .py file, remove the extension
-            module_path = module_path[:-3]
-        importlib.import_module(module_path)
-    except ImportError:
-        echo(f"Error: Could not import module '{module_path}'")
-        return
+    path, _, _ = _load_app(app_path)
 
     # Only import uvicorn when needed
     import uvicorn
 
-    uvicorn.run(app_path_str, host=host, port=port, reload=reload, factory=True)
+    uvicorn.run(path, host=host, port=port, reload=reload, factory=True)
 
 
+@app.command(name="collectstatic")
+def collectstatic():
+    """
+    Collect static files.
+    """
+    from django.core.management import call_command
+
+    call_command("collectstatic", interactive=False, clear=True, link=True)
+
+    
 # Add a helper command that doesn't require Django loading
 @app.command()
 def version():
@@ -92,14 +97,9 @@ def createsuperuser(
       unchained migrations createsuperuser                  # Interactive creation
       unchained migrations createsuperuser admin admin@example.com  # With username and email
     """
-    from unchained.cli.utils import get_app_path_arg, load_app_module
-
-    app_path_str = get_app_path_arg(app_path)
+    _load_app(app_path)
 
     from django.conf import settings
-
-    # Load app from the specified path
-    _, _ = load_app_module(app_path_str)
 
     # Settings should already be configured by the Unchained instance
     # If not configured, this will raise an exception
@@ -119,8 +119,28 @@ def createsuperuser(
     if noinput:
         kwargs["interactive"] = not noinput
 
-    call_command("superuser", *args, **kwargs)
+    call_command("createsuperuser", *args, **kwargs)
 
+@app.command(name="shell")
+def shell(
+    app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
+):
+    """
+    Start the Django shell.
+    """
+    _load_app(app_path)
+
+    from django.conf import settings
+
+    # Settings should already be configured by the Unchained instance
+    # If not configured, this will raise an exception
+    if not settings.configured:
+        echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
+        return
+
+    from django.core.management import call_command
+
+    call_command("shell")
 
 def main():
     app(prog_name="unchained")

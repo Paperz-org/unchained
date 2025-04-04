@@ -1,13 +1,23 @@
 import importlib
 import sys
 
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from unchained.settings.django import DjangoSettings
+from unchained.settings.django import BaseDjangoSettings, DefaultDjangoSettings
 
 
 class UnchainedSettings(BaseSettings):
+    _django: BaseDjangoSettings = PrivateAttr()
+
+    @property
+    def django(self) -> BaseDjangoSettings:
+        return self._django
+    
+    @django.setter
+    def django(self, value: BaseDjangoSettings):
+        self._django = value
+
     SETTINGS_MODULE: str | None = Field(default=None)
 
     model_config = SettingsConfigDict(
@@ -29,6 +39,7 @@ def load_settings() -> UnchainedSettings:
 
     unchained_settings_module = unchained_settings.SETTINGS_MODULE
     if not unchained_settings_module:
+        unchained_settings.django = DefaultDjangoSettings()
         return unchained_settings
 
     original_sys_path = sys.path.copy()
@@ -40,9 +51,11 @@ def load_settings() -> UnchainedSettings:
 
         for attr_name in dir(module):
             attr_value = getattr(module, attr_name)
+            if attr_name.startswith("_"):
+                continue
             if issubclass(attr_value, UnchainedSettings):
                 unchained_settings.add_settings(attr_value())
-            elif issubclass(attr_value, DjangoSettings):
+            elif issubclass(attr_value, BaseDjangoSettings):
                 unchained_settings.django = attr_value()
             elif attr_name.isupper() and not attr_name.startswith("_") and not attr_name.startswith("DJANGO_"):
                 setattr(unchained_settings, attr_name, attr_value)
@@ -53,7 +66,7 @@ def load_settings() -> UnchainedSettings:
         sys.path = original_sys_path
 
     if not hasattr(unchained_settings, "django"):
-        unchained_settings.django = DjangoSettings()
+        unchained_settings.django = DefaultDjangoSettings()
 
     for key, value in _django_future_settings.items():
         setattr(unchained_settings.django, key, value)

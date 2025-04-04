@@ -19,12 +19,6 @@ app.add_router("/router", router)
 app.admin.register(User, UserAdmin)
 app.admin.register(Product, ProductAdmin)
 
-
-class BaseHeader(BaseModel):
-    model_config = ConfigDict(extra="allow")
-    x_api_key: str
-
-
 def other_dependency() -> str:
     print("other_dependency")
     return "world"

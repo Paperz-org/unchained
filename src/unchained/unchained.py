@@ -2,17 +2,20 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
+from django.urls import URLPattern, URLResolver, include, path
 from ninja import NinjaAPI
 
 from unchained.admin import UnchainedAdmin
-from unchained.meta import UnchainedMeta
+from unchained.meta import URLPatterns, UnchainedMeta
 
 if TYPE_CHECKING:
     from .models.base import BaseModel
 
 
+
 class Unchained(NinjaAPI, metaclass=UnchainedMeta):
     APP_NAME = "unchained.app"
+    urlpatterns = URLPatterns()
 
     def __init__(
         self,
@@ -26,6 +29,7 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
 
         # Call parent init
         super().__init__(**kwargs)
+
 
     @cached_property
     def app(self):
@@ -57,17 +61,17 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
             tags=tags,
             queryset=queryset,
             operations=operations,
-        )
-
-        self.add_router(router.path, router.router)
+        )    
 
     def __call__(self, *args, **kwargs):
         from django.conf import settings
         from django.conf.urls.static import static
         from django.contrib import admin
 
-        self.urlpatterns.append(self._path("api/", self.urls))
-        self.urlpatterns.append(self._path("admin/", admin.site.urls))
+        self.urlpatterns.add(self._path("api/", self.urls))
+        self.urlpatterns.add(self._path("admin/", admin.site.urls))
         if settings.DEBUG:
-            self.urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+            self.urlpatterns.add(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))
         return self.app
+    
+

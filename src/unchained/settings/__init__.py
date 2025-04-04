@@ -1,6 +1,6 @@
 from .base import UnchainedSettings, load_settings
-from .django import DjangoSettings
+from .django import BaseDjangoSettings, DefaultDjangoSettings
 
 settings = load_settings()
 
-__all__ = ["UnchainedSettings", "DjangoSettings", "settings"]
+__all__ = ["UnchainedSettings", "BaseDjangoSettings", "DefaultDjangoSettings", "settings"]
