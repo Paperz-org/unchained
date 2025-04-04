@@ -5,6 +5,7 @@ from django.db.models import QuerySet
 from django.urls import URLPattern, URLResolver, include, path
 from ninja import NinjaAPI
 
+
 from unchained.admin import UnchainedAdmin
 from unchained.meta import URLPatterns, UnchainedMeta
 
