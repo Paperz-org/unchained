@@ -148,7 +148,6 @@ class UnchainedMeta(UnchainedBaseMeta):
         for http_method in ["get", "post", "put", "patch", "delete"]:
             setattr(new_cls, http_method, cls._create_http_method(http_method, new_cls))
 
-        breakpoint()
         django_settings.configure(**settings.django.get_settings(), ROOT_URLCONF=new_cls)
         django_setup()
 
