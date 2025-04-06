@@ -12,6 +12,8 @@ from unchained.meta import URLPatterns, UnchainedMeta
 from unchained.lifespan import Lifespan
 import inspect
 
+from unchained.states import BaseState
+
 
 if TYPE_CHECKING:
     from .models.base import BaseModel
@@ -24,12 +26,15 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         self,
         admin: UnchainedAdmin | None = None,
         lifespan: Callable | None = None,
+        state: BaseState | None = None,
         **kwargs,
     ):
         from django.urls import path
 
         self._path = path
         self.admin = admin or UnchainedAdmin()
+        self.state = state or BaseState()
+    
         self._lifespan = self._wrap_lifespan(lifespan) if lifespan else None    
 
         # Call parent init
@@ -71,7 +76,7 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         # Get the Django ASGI application
         django_app = get_asgi_application()
         
-        return Lifespan(django_app, self._lifespan)
+        return Lifespan(self, django_app, self._lifespan)
 
     def crud(
         self,

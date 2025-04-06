@@ -1,12 +1,13 @@
 from typing import Callable, AsyncContextManager
 from contextlib import AsyncExitStack
 import inspect
-
+from django.core.handlers.asgi import ASGIHandler
 
 
 class Lifespan:
-    def __init__(self, app, user_func: Callable | None = None):
-        self.app = app
+    def __init__(self, unchained_app, django_app: ASGIHandler, user_func: Callable | None = None):
+        self.unchained_app = unchained_app
+        self.django_app = django_app
         self.user_func = user_func
         self.exit_stack = AsyncExitStack()
     
@@ -34,7 +35,7 @@ class Lifespan:
                 else:
                     await send({"type": "lifespan.shutdown.failed", "message": str(e)})
         else:
-            await self.app(scope, receive, send)
+            await self.django_app(scope, receive, send)
     
     def _lifespan_parameter(self):
         """
@@ -58,4 +59,4 @@ class Lifespan:
         for param in signature.parameters.values():
             if param.annotation and not issubclass(param.annotation, Unchained):
                 raise ValueError("The only parameter of the lifespan function must be a Unchained app")
-            return {param.name: self.app}
+            return {param.name: self.unchained_app}
