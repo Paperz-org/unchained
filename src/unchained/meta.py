@@ -54,7 +54,7 @@ class UnchainedBaseMeta(type):
                                 type_, instance = get_args(param.annotation)
                                 if isinstance(instance, BaseCustom):
                                     # Add the type to the CustomField
-                                    setattr(instance, "param_name", param.name)
+                                    setattr(instance, "_signature_param_name", param.name)
                                     setattr(instance, "annotation_type", type_)
                                 if isinstance(instance, model.Depends):
                                     # If the dependency has a request parameter, we need to remove it

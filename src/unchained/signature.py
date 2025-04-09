@@ -5,6 +5,7 @@ from typing import Annotated, Any, get_args, get_origin
 from django.http import HttpRequest
 from fast_depends.dependencies import model
 from unchained.base import BaseUnchained
+from unchained.dependencies.header import BaseCustom
 from unchained.settings import settings
 from unchained.settings.base import UnchainedSettings
 from unchained.states import BaseState
@@ -50,6 +51,12 @@ class Parameter(inspect.Parameter):
     def is_auto_depends(self) -> bool:
         """Check if the parameter is an auto depends parameter."""
         return self.is_request or self.is_settings or self.is_app or self.is_state
+
+    @property
+    def is_custom_depends(self) -> bool:
+        breakpoint()
+        """Check if the parameter is a custom depends parameter."""
+        return issubclass(self.annotation, BaseCustom)
 
     @classmethod
     def from_parameter(cls, param: inspect.Parameter) -> "Parameter":
@@ -191,7 +198,9 @@ class SignatureUpdater:
         # If the dependency has a request parameter, we need to remove it
         # because we will inject the request parameter later
         defaults_dependencies = signature.get_default_dependencies()
-
+        
+        #if isinstance(instance, BaseCustom):
+    
         if defaults_dependencies:
             instance.dependency = partial(instance.dependency)
             # Create a partial function with all default dependencies set to None
@@ -208,5 +217,9 @@ class SignatureUpdater:
                 continue
             # If the dependency is a Depends, we call the function recursively to update the signature of the dependency and
             # create the partial function if needed.
-            _, next_dependency = get_args(param.annotation)
+            type_, next_dependency = get_args(param.annotation)
+            if isinstance(next_dependency, BaseCustom):
+                next_dependency.annotation_type = type_
+                next_dependency._signature_param_name = param.name
+
             self.update_deep_dependencies(next_dependency)

@@ -20,7 +20,13 @@ class BaseCustom(model.Depends, Generic[T]):
         self.dependency = self.__call__
         self.use_cache = use_cache
         self.cast = cast
-        self.param_name: str | None = None
+
+        # This is the name of the parameter in the signature of the function.
+        # It is injected during the parsing of the dependencies.
+        self._signature_param_name: str | None = None
+
+        # This is the type of the parameter in the signature of the function.
+        # It is injected during the parsing of the dependencies.
         self.annotation_type: type[T]
 
     def __call__(self, *args, **kwargs) -> T:
@@ -32,17 +38,16 @@ class Header(BaseCustom, Generic[T]):
         super().__init__()
         self.param_name = param_name
         self.required = required
-        self.annotation_type: type[T]
 
     def __call__(self, request: DjangoHttpRequest) -> T | None:
         headers = request.headers
-        # breakpoint()
+        param_name = self.param_name or self._signature_param_name
 
-        if self.param_name and self.param_name in headers:
+        if param_name and param_name in headers:
             if issubclass(self.annotation_type, BaseModel):
                 return cast(T, self.annotation_type.model_validate(headers))
             else:
-                return self.annotation_type(headers[self.param_name])  # type: ignore
+                return self.annotation_type(headers[param_name])  # type: ignore
 
         if self.required:
             raise ValidationError([{"msg": f"Missing header: {self.param_name}"}])
