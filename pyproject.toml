@@ -6,8 +6,6 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "uvicorn>=0.34.0",
-    "django-ninja@git+ssh://git@github.com/mde-pach/django-ninja.git@master",
-    "ninja-crud@git+ssh://git@github.com/Paperz-org/ninja-crud.git@main",
     "fast-depends>=2.4.12",
     "django-jazzmin>=3.0.1",
     "typer>=0.15.2",
@@ -29,8 +27,8 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src"]
-include = ["unchained*"]
+where = ["src", "src/django-ninja", "src/ninja-crud"]
+include = ["unchained*", "ninja*", "ninja_crud*"]
 
 [dependency-groups]
 dev = [
@@ -41,7 +39,7 @@ dev = [
     "pytest>=8.3.5",
     "ruff>=0.11.2",
     "pdbpp>=0.10.3",
-    "pytest-asyncio>=0.26.0"
+    "pytest-asyncio>=0.26.0",
 ]
 doc = [
     "mkdocs==1.6.1",

@@ -25,7 +25,6 @@ class UnchainedBaseMeta(type):
                         if hasattr(api_func, "_original_api_func"):
                             api_func = api_func._original_api_func
 
-                        
                         # Get the signature of the API function
                         api_func_signature = Signature.from_callable(api_func)
                         # TODO msut work but ????????????????????????????????????
@@ -57,7 +56,7 @@ class UnchainedBaseMeta(type):
                                     updater = SignatureUpdater()
                                     updater.update_deep_dependencies(instance)
                                     _with_request_dependency.extend(updater.partialised_dependencies)
-                        
+
                         injected = inject(api_func)
 
                         # Update function signature with new parameters
@@ -76,7 +75,6 @@ class UnchainedBaseMeta(type):
                             for dep in _with_request_dependency:
                                 dep.dependency.keywords["request"] = request
 
-
                             return func_args, func_kwargs
 
                         # Here is the sync last decorator
@@ -93,7 +91,7 @@ class UnchainedBaseMeta(type):
                             # This is the API result:
                             res = await injected(*func_args, **func_kwargs)
                             return res
-    
+
                         result = http_method(*decorator_args, **decorator_kwargs)(
                             adecorated if asyncio.iscoroutinefunction(api_func) else decorated
                         )
@@ -124,8 +122,8 @@ class UnchainedRouterMeta(UnchainedBaseMeta):
             setattr(new_cls, http_method, cls._create_http_method(http_method, new_cls))
         return new_cls
 
+
 class URLPatterns(list):
-    
     def add(self, value):
         if isinstance(value, list):
             self.extend(value)
@@ -151,5 +149,4 @@ class UnchainedMeta(UnchainedBaseMeta):
         django_settings.configure(**settings.django.get_settings(), ROOT_URLCONF=new_cls)
         django_setup()
 
-        return new_cls
         return new_cls
