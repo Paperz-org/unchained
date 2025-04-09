@@ -13,8 +13,8 @@ from fast_depends.dependencies import model
 
 class UnchainedBaseMeta(type):
 
-    @classmethod
-    def _create_http_method(cls, http_method_name: str, type_: type) -> Callable:
+    @staticmethod
+    def _create_http_method(http_method_name: str, type_: type) -> Callable:
         """Factory to create HTTP method handlers with proper signature."""
         # TODO: we have a perfomance issue: we are creating partial functions for each reference to a dependency.
         # We should use only one partial function per dependency that need it.
@@ -29,6 +29,8 @@ class UnchainedBaseMeta(type):
                         
                         # Get the signature of the API function
                         api_func_signature = Signature.from_callable(api_func)
+
+                        # If the API function has default dependencies, we create a partial function with the default dependencies
                         if api_func_signature.has_default_dependencies:
                             api_func = functools.partial(api_func, **api_func_signature.get_default_dependencies())
                             signature_without_dependencies = api_func_signature.new_signature_without_default_dependencies()
@@ -60,7 +62,6 @@ class UnchainedBaseMeta(type):
                                     # We need to update the signature because FastDepends will create a model based on the signature.
                                     # This operation must be done recursively to update all the dependencies
                                     # See SignatureUpdater for more details
-
                                     updater = SignatureUpdater()
                                     updater.update_deep_dependencies(instance)
                                     _with_request_dependency.extend(updater.partialised_dependencies)
