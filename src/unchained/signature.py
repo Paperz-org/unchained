@@ -4,32 +4,124 @@ from typing import Annotated, Any, get_args, get_origin
 
 from django.http import HttpRequest
 from fast_depends.dependencies import model
+from unchained.base import BaseUnchained
+from unchained.settings import settings
+from unchained.settings.base import UnchainedSettings
+from unchained.states import BaseState
 
+class Parameter(inspect.Parameter):
+    """
+    A custom parameter class that extends inspect.Parameter to add Unchained-specific functionality.
+    """
+    @property
+    def is_annotated(self) -> bool:
+        """Check if the parameter is annotated."""
+        return hasattr(self.annotation, "__origin__") and get_origin(self.annotation) is Annotated
+
+    @property
+    def is_request(self) -> bool:
+        """Check if the parameter is a request parameter."""
+        return issubclass(self.annotation, HttpRequest)
+
+    @property
+    def is_settings(self) -> bool:
+        """Check if the parameter is a settings parameter."""
+        return issubclass(self.annotation, UnchainedSettings)
+
+    @property
+    def is_app(self) -> bool:
+        """Check if the parameter is an app parameter."""
+        return issubclass(self.annotation, BaseUnchained)
+
+    @property
+    def is_state(self) -> bool:
+        """Check if the parameter is a state parameter."""
+        return issubclass(self.annotation, BaseState)
+
+    @property
+    def is_depends(self) -> bool:
+        """Check if the parameter is a depends parameter."""
+        if self.is_annotated:
+            _, instance = get_args(self.annotation)
+            return isinstance(instance, model.Depends)
+        return False
+    
+    @property
+    def is_auto_depends(self) -> bool:
+        """Check if the parameter is an auto depends parameter."""
+        return self.is_request or self.is_settings or self.is_app or self.is_state
+
+    @classmethod
+    def from_parameter(cls, param: inspect.Parameter) -> "Parameter":
+        """Create an UnchainedParam instance from an inspect.Parameter."""
+        return cls(
+            name=param.name,
+            kind=param.kind,
+            default=param.default,
+            annotation=param.annotation
+        )
 
 class Signature(inspect.Signature):
+    parameters: dict[str, Parameter]
+
+    def __init__(self, parameters=None, return_annotation=inspect.Signature.empty, __validate_parameters__=True):
+        if parameters is not None:
+            parameters = [
+                Parameter.from_parameter(p) if not isinstance(p, Parameter) else p
+                for p in parameters
+            ]
+        super().__init__(parameters=parameters, return_annotation=return_annotation, __validate_parameters__=__validate_parameters__)
+
+    @classmethod
+    def from_callable(cls, obj, *, follow_wrapped=True, globals=None, locals=None, eval_str=False):
+        sig = super().from_callable(obj, follow_wrapped=follow_wrapped, globals=globals, locals=locals, eval_str=eval_str)
+        parameters = [
+            Parameter.from_parameter(p) if not isinstance(p, Parameter) else p
+            for p in sig.parameters.values()
+        ]
+        return cls(parameters=parameters, return_annotation=sig.return_annotation)
+
     @property
     def has_request_object(self) -> bool:
         """
         Check if the signature has a request parameter (HttpRequest from Django).
         """
         for param_name, param in self.parameters.items():
-            if self.param_is_annotated(param):
+            if param.is_annotated:
                 continue
-            if self.param_is_request(param) or param_name == "request":
+            if param.is_request and param_name == "request":
+                return True
+        return False
+
+    @property
+    def has_default_dependencies(self) -> bool:
+        """
+        Check if the signature has a request parameter (HttpRequest from Django).
+        """
+        for param_name, param in self.parameters.items():
+            if param.is_annotated:
+                continue
+            if param.is_request or param_name == "request":
+                return True
+            if param.is_settings or param_name == "settings":
+                return True
+            if param.is_app or param_name == "app":
+                return True
+            if param.is_state or param_name == "state":
                 return True
 
         return False
 
-    def new_signature_without_request(self) -> "Signature":
+    def new_signature_without_default_dependencies(self) -> "Signature":
         """
-        Create a new instance of the signature without the request parameter.
+        Create a new instance of the signature without the default dependencies (request, settings, app, state).
         """
         parameters = []
         for _, param in self.parameters.items():
-            if self.param_is_annotated(param):
+            if param.is_annotated:
                 parameters.append(param)
                 continue
-            if self.param_is_request(param):
+            if param.is_auto_depends:
                 continue
             parameters.append(param)
 
@@ -43,27 +135,31 @@ class Signature(inspect.Signature):
         """
         parameters = []
         for _, param in self.parameters.items():
-            if self.param_is_annotated(param):
+            if param.is_annotated:
                 continue
             parameters.append(param)
 
         return Signature(parameters)
 
-    @staticmethod
-    def param_is_annotated(param: Any) -> bool:
-        annotation = param.annotation
-        return hasattr(annotation, "__origin__") and get_origin(annotation) is Annotated
-
-    @staticmethod
-    def param_is_request(param: Any) -> bool:
-        return issubclass(param.annotation, HttpRequest)
-
-    @classmethod
-    def param_is_depends(cls, param: Any) -> bool:
-        if cls.param_is_annotated(param):
-            _, instance = get_args(param.annotation)
-            return isinstance(instance, model.Depends)
-        return False
+    def get_default_dependencies(self) -> dict[str, Any]:
+        """
+        Get a dictionary of all default dependencies and their parameter names.
+        Returns a dictionary where keys are parameter names and values are the parameter objects.
+        """
+        default_deps = {}
+        for param_name, param in self.parameters.items():
+            if param.is_annotated:
+                continue
+            if param.is_request and param_name == "request":
+                default_deps["request"] = None
+            elif param.is_settings and param_name == "settings":
+                default_deps["settings"] = None
+            elif param.is_app and param_name == "app":
+                default_deps["app"] = None
+            elif param.is_state and param_name == "state":
+                default_deps["state"] = None
+        return default_deps
+    
 
 
 class SignatureUpdater:
@@ -94,18 +190,21 @@ class SignatureUpdater:
 
         # If the dependency has a request parameter, we need to remove it
         # because we will inject the request parameter later
-        if signature.has_request_object:
-            # Create a partial function with the request parameter (with request=None because we will inject it later)
-            instance.dependency = partial(instance.dependency, request=None)
+        defaults_dependencies = signature.get_default_dependencies()
+
+        if defaults_dependencies:
+            instance.dependency = partial(instance.dependency)
+            # Create a partial function with all default dependencies set to None
+            instance.dependency.keywords.update(**defaults_dependencies)
             # Update the signature of the dependency
-            instance.dependency.__signature__ = signature.new_signature_without_request()  # type: ignore
+            instance.dependency.__signature__ = signature.new_signature_without_default_dependencies()  # type: ignore
             # Store the dependency to inject it later
             self.partialised_dependencies.append(instance)
 
         # We check all the dependencies of the current signature
         for _, param in signature.parameters.items():
             # If the dependency is not a Depends, we skip it
-            if not Signature.param_is_depends(param):
+            if not param.is_depends:
                 continue
             # If the dependency is a Depends, we call the function recursively to update the signature of the dependency and
             # create the partial function if needed.

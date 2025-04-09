@@ -8,11 +8,13 @@ from fast_depends.dependencies import model
 
 from unchained.dependencies.header import BaseCustom
 from unchained.signature import Signature, SignatureUpdater
+from fast_depends.dependencies import model
 
 
 class UnchainedBaseMeta(type):
-    @staticmethod
-    def _create_http_method(http_method_name: str, type_: type) -> Callable:
+
+    @classmethod
+    def _create_http_method(cls, http_method_name: str, type_: type) -> Callable:
         """Factory to create HTTP method handlers with proper signature."""
         # TODO: we have a perfomance issue: we are creating partial functions for each reference to a dependency.
         # We should use only one partial function per dependency that need it.
@@ -24,15 +26,21 @@ class UnchainedBaseMeta(type):
                     def wrapper(api_func):
                         if hasattr(api_func, "_original_api_func"):
                             api_func = api_func._original_api_func
-
+                        
                         # Get the signature of the API function
                         api_func_signature = Signature.from_callable(api_func)
-                        # TODO msut work but ????????????????????????????????????
+                        if api_func_signature.has_default_dependencies:
+                            api_func = functools.partial(api_func, **api_func_signature.get_default_dependencies())
+                            signature_without_dependencies = api_func_signature.new_signature_without_default_dependencies()
+                            api_func.__signature__ = signature_without_dependencies
+                            api_func_signature = signature_without_dependencies
+                        
+                        # TODO must work but ????????????????????????????????????
                         # _original_signature = Signature.from_callable(api_func)
                         _original_signature = copy.deepcopy(api_func_signature)
 
-                        for param_name, param in api_func_signature.parameters.items():
-                            if Signature.param_is_annotated(param):
+                        for param in api_func_signature.parameters.values():
+                            if param.is_annotated:
                                 # If the parameter is Annotated, we need to extract the type and instance
                                 # We use this to add the type in the CustomField.
                                 # Because FastDepends don't inject the type in the CustomField.
@@ -44,7 +52,7 @@ class UnchainedBaseMeta(type):
                                 type_, instance = get_args(param.annotation)
                                 if isinstance(instance, BaseCustom):
                                     # Add the type to the CustomField
-                                    setattr(instance, "param_name", param_name)
+                                    setattr(instance, "param_name", param.name)
                                     setattr(instance, "annotation_type", type_)
                                 if isinstance(instance, model.Depends):
                                     # If the dependency has a request parameter, we need to remove it
@@ -73,7 +81,25 @@ class UnchainedBaseMeta(type):
                                 func_args = func_args[1:]
                             # Inject the request parameter in all the partials function that have a request parameter
                             for dep in _with_request_dependency:
-                                dep.dependency.keywords["request"] = request
+                                for kwarg in dep.dependency.keywords:
+                                    if kwarg == "request":
+                                        dep.dependency.keywords["request"] = request
+                                    elif kwarg == "settings":
+                                        dep.dependency.keywords["settings"] = self.settings
+                                    elif kwarg == "app":
+                                        dep.dependency.keywords["app"] = self
+                                    elif kwarg == "state":
+                                        dep.dependency.keywords["state"] = self.state
+                            
+                            if isinstance(api_func, functools.partial):
+                                for kwarg in api_func.keywords:
+                                    if kwarg == "settings":
+                                        api_func.keywords["settings"] = self.settings
+                                    elif kwarg == "app":
+                                        api_func.keywords["app"] = self
+                                    elif kwarg == "state":
+                                        api_func.keywords["state"] = self.state
+                                    
 
                             return func_args, func_kwargs
 
@@ -145,8 +171,11 @@ class UnchainedMeta(UnchainedBaseMeta):
         # Create HTTP method decorators dynamically before class creation
         for http_method in ["get", "post", "put", "patch", "delete"]:
             setattr(new_cls, http_method, cls._create_http_method(http_method, new_cls))
+        
 
         django_settings.configure(**settings.django.get_settings(), ROOT_URLCONF=new_cls)
         django_setup()
+
+        new_cls.settings = settings
 
         return new_cls

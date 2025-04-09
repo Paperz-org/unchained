@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from django.db.models import QuerySet
 from django.urls import URLPattern, URLResolver, include, path
-from ninja import NinjaAPI
 
 
 from unchained.admin import UnchainedAdmin
+from unchained.base import BaseUnchained
 from unchained.meta import URLPatterns, UnchainedMeta
 from unchained.lifespan import Lifespan
 import inspect
@@ -17,8 +17,9 @@ from unchained.states import BaseState
 
 if TYPE_CHECKING:
     from .models.base import BaseModel
- 
-class Unchained(NinjaAPI, metaclass=UnchainedMeta):
+
+
+class Unchained(BaseUnchained, metaclass=UnchainedMeta):
     APP_NAME = "unchained.app"
     urlpatterns = URLPatterns()
 
