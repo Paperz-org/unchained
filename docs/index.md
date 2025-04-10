@@ -1,64 +1,83 @@
-# Unchained Documentation
+# Unchained Framework
 
 !!! tip "Modern API Framework"
-    Unchained is a lightweight wrapper around [Django](https://www.djangoproject.com/) that simplifies API development using [Django Ninja](https://django-ninja.dev/).
+    Unchained is a powerful Python web framework built on top of Django. It provides a modern, type-safe, and dependency-injection based approach to building web applications.
 
-## Core Features
+## :material-bolt: Quick Start
 
-- :material-bolt: **Dependency Injection**: Using Python type annotations
-- :material-database: **Automatic CRUD Operations**: Generate API endpoints for your models
-
-## Quick Example
-
-=== "Basic Usage"
-
-    ```python
-    from typing import Annotated
-    
-    from models import User
-    from unchained import Depends, Unchained
-    
-    app = Unchained()
-    
-    
-    def other_dependency() -> str:
-        return "world"
-    
-    
-    def dependency(other_dependency: Annotated[str, Depends(other_dependency)]) -> str:
-        return other_dependency
-    
-    
-    @app.get("/hello/{a}")
-    def hello(request, a: str, b: Annotated[str, Depends(dependency)]):
-        return {"message": f"Hello {a} {b} !"}
-    
-    
-    app.crud(User)
+=== "Installation"
+    ```bash
+    pip install unchained
     ```
 
-=== "With CRUD Operations"
+=== "Basic Application"
+    ```python
+    from unchained import Unchained
 
+    app = Unchained()
+
+    @app.get("/hello/{name}")
+    def hello(name: str):
+        return {"message": f"Hello {name}!"}
+    ```
+
+=== "With Models"
     ```python
     from django.db import models
-    from unchained import Unchained
     from unchained.models.base import BaseModel
-    
+
     class User(BaseModel):
         name = models.CharField(max_length=255)
         email = models.EmailField(unique=True)
-    
-    app = Unchained()
+
     app.crud(User)  # Automatically generates CRUD endpoints
     ```
 
-## Documentation Sections
+## :material-feature-search-outline: Features
 
-- [:material-power-plug: Dependency Injection](dependency-injection/intro.md)
-- [:material-database: CRUD Operations](crud/customizing.md)
-- [:material-cog: Advanced Topics](advanced/custom-responses.md)
+| Feature | Description |
+|---------|-------------|
+| :material-database: Django Integration | Seamless integration with Django's ORM and admin interface |
+| :material-api: FastAPI-like Routing | Modern routing system with dependency injection |
+| :material-cog: CRUD Operations | Built-in support for CRUD operations on models |
+| :material-code-braces: Type Safety | Full type hints support throughout the framework |
+| :material-power-plug: Dependency Injection | Powerful dependency injection system using FastDepends |
+| :material-view-dashboard: Admin Interface | Customizable admin interface for models |
+| :material-timer: Lifespan Management | Support for application startup and shutdown events |
+| :material-state-machine: State Management | Application-wide state management |
 
-## Official Documentation
+## :material-book-open-page-variant: Documentation
+
+### Getting Started
+
+- [:material-api: Routing](core/routing.md)
+- [:material-power-plug: Dependency Injection](core/dependency-injection.md)
+- [:material-timer: Lifespan Management](core/lifespan.md)
+- [:material-state-machine: State Management](core/state.md)
+- [:material-database: Models & CRUD](core/models.md)
+- [:material-view-dashboard: Admin Interface](core/admin.md)
+
+### Advanced Topics
+
+- [:material-cog: Settings](advanced/settings.md)
+- [:material-code-braces: Type Safety](advanced/type-safety.md)
+- [:material-shield-check: Security](advanced/security.md)
+
+### Examples
+
+- [:material-code-tags: Basic API](examples/basic-api.md)
+- [:material-database: CRUD Example](examples/crud.md)
+- [:material-power-plug: Dependency Injection](examples/dependency-injection.md)
+- [:material-state-machine: State Management](examples/state.md)
+
+## :material-help-circle: Getting Help
+
+- :material-github: [GitHub Issues](https://github.com/yourusername/unchained/issues)
+- :material-discord: [Discord Community](https://discord.gg/your-discord)
+- :material-email: [Email Support](mailto:support@example.com)
+
+## :material-book-open-variant: Related Documentation
 
 - [:fontawesome-brands-python: Django Documentation](https://docs.djangoproject.com/en/stable/)
-- [:material-api: Django Ninja Documentation](https://django-ninja.dev/) 
+- [:material-api: Django Ninja Documentation](https://django-ninja.dev/)
+- [:material-power-plug: FastDepends Documentation](https://fast-depends.readthedocs.io/) 
