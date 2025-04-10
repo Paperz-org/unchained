@@ -24,6 +24,8 @@ jobs:
           echo "Head ref: ${{ github.head_ref }}"
       
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Configure Git Credentials
         run: |
