@@ -1,7 +1,7 @@
 site_name: Unchained
 site_description: Modern, high-performance Python web framework based on Django Ninja with FastDepends
 site_url: https://unchained-framework.org
-repo_url: https://github.com/yourusername/unchained
+repo_url: https://github.com/Paperz-org/unchained
 repo_name: Unchained
 dev_addr: 127.0.0.1:8001
 
