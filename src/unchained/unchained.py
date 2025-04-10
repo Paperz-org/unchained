@@ -1,4 +1,6 @@
+import inspect
 from contextlib import asynccontextmanager, contextmanager
+from contextvars import ContextVar
 from functools import cached_property, wraps
 from typing import TYPE_CHECKING, Any, Callable
 
@@ -6,19 +8,21 @@ from django.db.models import QuerySet
 from django.urls import URLPattern, URLResolver, include, path
 from ninja import NinjaAPI
 
-
 from unchained.admin import UnchainedAdmin
-from unchained.meta import URLPatterns, UnchainedMeta
+from unchained.base import BaseUnchained
 from unchained.lifespan import Lifespan
-import inspect
-
+from unchained.meta import UnchainedMeta, URLPatterns
 from unchained.states import BaseState
+
+app = ContextVar("app", default=None)
+request = ContextVar("request", default=None)
 
 
 if TYPE_CHECKING:
     from .models.base import BaseModel
- 
-class Unchained(NinjaAPI, metaclass=UnchainedMeta):
+
+
+class Unchained(BaseUnchained, metaclass=UnchainedMeta):
     APP_NAME = "unchained.app"
     urlpatterns = URLPatterns()
 
@@ -34,21 +38,21 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         self._path = path
         self.admin = admin or UnchainedAdmin()
         self.state = state or BaseState()
-    
-        self._lifespan = self._wrap_lifespan(lifespan) if lifespan else None    
+
+        self._lifespan = self._wrap_lifespan(lifespan) if lifespan else None
 
         # Call parent init
         super().__init__(**kwargs)
+        app.set(self)
 
-    
     def lifespan(self, func: Callable):
         if self._lifespan:
             raise ValueError("Lifespan already set")
 
         self._lifespan = self._wrap_lifespan(func)
-    
+
         return func
-    
+
     @staticmethod
     def _wrap_lifespan(func: Callable):
         if inspect.isgeneratorfunction(func):
@@ -58,13 +62,13 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
                 sync_cm = contextmanager(func)
                 with sync_cm(*args, **kwargs) as value:
                     yield value
-            
+
             return asynccontextmanager(async_wrapper)
 
         elif inspect.isasyncgenfunction(func):
             # For async generator functions
             return asynccontextmanager(func)
-    
+
         else:
             raise ValueError("Lifespan function must be a generator function")
 
@@ -72,10 +76,10 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
     def app(self):
         """Return the ASGI application wrapped with lifespan middleware."""
         from django.core.asgi import get_asgi_application
-        
+
         # Get the Django ASGI application
         django_app = get_asgi_application()
-        
+
         return Lifespan(self, django_app, self._lifespan)
 
     def crud(
@@ -102,7 +106,7 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
             tags=tags,
             queryset=queryset,
             operations=operations,
-        )    
+        )
 
     def __call__(self, *args, **kwargs):
         from django.conf import settings
@@ -114,10 +118,8 @@ class Unchained(NinjaAPI, metaclass=UnchainedMeta):
         if settings.DEBUG:
             self.urlpatterns.add(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))
         return self.app
-    
 
     @staticmethod
     def is_generator_function(func):
         """Check if the function is a generator function (uses yield)."""
         return inspect.isasyncgenfunction(func)
-    

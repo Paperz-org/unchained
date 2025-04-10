@@ -64,9 +64,12 @@ class UnchainedBaseMeta(type):
                         api_func.__signature__ = api_func_signature.new_signature_without_annotated()
 
                         def _prepare_execution(func_args, func_kwargs):
+                            from unchained.unchained import request as unchained_request
+
                             api_func.__signature__ = api_func_signature
                             # Get the request parameter
                             request = func_args[0]
+                            unchained_request.set(request)
 
                             # If the API function doesn't have a request parameter, we remove it from the arguments
                             if not api_func_signature.has_request_object:
