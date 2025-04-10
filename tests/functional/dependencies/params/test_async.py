@@ -15,7 +15,6 @@ from unchained import Depends, Unchained
 
 @pytest.fixture
 def client(app: Unchained, async_test_client: UnchainedAsyncTestClient) -> UnchainedAsyncTestClient:
-
     async def dependency(param: str) -> str:
         return param
 
@@ -27,7 +26,6 @@ def client(app: Unchained, async_test_client: UnchainedAsyncTestClient) -> Uncha
 
     async def route(result: Annotated[str, Depends(dependency)]) -> str:
         return result
-
 
     for method in SUPPORTED_HTTP_METHODS:
         getattr(app, method)(DEFAULT_PARAM_PATH)(default_param_route)

@@ -10,9 +10,7 @@ class MainAppModelMeta(models.base.ModelBase):
     # Class variable to track all models created with this metaclass
     models_registry: List[Type] = []
 
-    def __new__(
-        cls, name: str, bases: tuple[type, ...], attrs: dict[str, Any]
-    ) -> "MainAppModelMeta":
+    def __new__(cls, name: str, bases: tuple[type, ...], attrs: dict[str, Any]) -> "MainAppModelMeta":
         # Set app_label in Meta if not already set
         if "Meta" not in attrs:
             attrs["Meta"] = type("Meta", (), {"app_label": "app"})

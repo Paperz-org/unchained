@@ -1,4 +1,4 @@
-from typing import Callable, AsyncContextManager
+from typing import Callable
 from contextlib import AsyncExitStack
 import inspect
 from django.core.handlers.asgi import ASGIHandler
@@ -10,7 +10,7 @@ class Lifespan:
         self.django_app = django_app
         self.user_func = user_func
         self.exit_stack = AsyncExitStack()
-    
+
     async def __call__(self, scope, receive, send):
         if scope["type"] == "lifespan" and self.user_func:
             try:
@@ -19,10 +19,10 @@ class Lifespan:
                     if message["type"] == "lifespan.startup":
                         # Create the context manager with the lifespan parameter (app or None)
                         cm = self.user_func(**self._lifespan_parameter())
-                       
-                        await self.exit_stack.enter_async_context(cm) 
+
+                        await self.exit_stack.enter_async_context(cm)
                         await send({"type": "lifespan.startup.complete"})
-        
+
                     elif message["type"] == "lifespan.shutdown":
                         # Exit all context managers
                         await self.exit_stack.aclose()
@@ -36,7 +36,7 @@ class Lifespan:
                     await send({"type": "lifespan.shutdown.failed", "message": str(e)})
         else:
             await self.django_app(scope, receive, send)
-    
+
     def _lifespan_parameter(self):
         """
         Check if the lifespan function has a parameter and if it is a Unchained app.
@@ -52,10 +52,10 @@ class Lifespan:
 
         if signature_length > 1:
             raise ValueError("Lifespan function must have exactly one or no parameters")
-        
+
         if signature_length == 0:
             return {}
-        
+
         for param in signature.parameters.values():
             if param.annotation and not issubclass(param.annotation, Unchained):
                 raise ValueError("The only parameter of the lifespan function must be a Unchained app")

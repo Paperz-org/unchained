@@ -1,9 +1,8 @@
-from django.http import HttpRequest as DjangoHttpRequest
-from fast_depends import Depends
+from unchained.dependencies.depends import Depends
 
-from . import app, models
+from . import models
 from .unchained import Unchained
+from .request import Request
 
-Request = DjangoHttpRequest
 
 __all__ = ["Unchained", "models", "Depends", "Request"]

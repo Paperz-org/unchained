@@ -13,7 +13,7 @@ class UnchainedSettings(BaseSettings):
     @property
     def django(self) -> BaseDjangoSettings:
         return self._django
-    
+
     @django.setter
     def django(self, value: BaseDjangoSettings):
         self._django = value

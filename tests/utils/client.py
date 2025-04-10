@@ -11,16 +11,12 @@ class UnchainedTestClient(NinjaTestClient):
 
 
 class UnchainedAsyncTestClient(NinjaAsyncTestClient):
-    async def _call(
-        self, func: Callable, request: Mock, kwargs: Dict
-    ) -> "NinjaResponse":
+    async def _call(self, func: Callable, request: Mock, kwargs: Dict) -> "NinjaResponse":
         # breakpoint()
         res = await func(request, **kwargs)
         return NinjaResponse(res)
-    
-    def _resolve(
-        self, method: str, path: str, data: Dict, request_params: Any
-    ) -> Tuple[Callable, Mock, Dict]:
+
+    def _resolve(self, method: str, path: str, data: Dict, request_params: Any) -> Tuple[Callable, Mock, Dict]:
         # breakpoint()
         url_path = path.split("?")[0].lstrip("/")
         for url in self.urls:
@@ -29,4 +25,3 @@ class UnchainedAsyncTestClient(NinjaAsyncTestClient):
                 request = self._build_request(method, path, data, request_params)
                 return match.func, request, match.kwargs
         raise Exception(f'Cannot resolve "{path}"')
-

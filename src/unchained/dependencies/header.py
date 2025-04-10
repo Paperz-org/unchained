@@ -1,30 +1,12 @@
 from typing import Generic, TypeVar, cast
 
-from django.http import HttpRequest as DjangoHttpRequest
-from fast_depends.dependencies import model
 from ninja.errors import ValidationError
 from pydantic import BaseModel
 
+from unchained import Request
+from unchained.dependencies.custom import BaseCustom
+
 T = TypeVar("T")
-
-
-class BaseCustom(model.Depends, Generic[T]):
-    annotation_type: type[T]
-
-    def __init__(
-        self,
-        *,
-        use_cache: bool = True,
-        cast: bool = True,
-    ) -> None:
-        self.dependency = self.__call__
-        self.use_cache = use_cache
-        self.cast = cast
-        self.param_name: str | None = None
-        self.annotation_type: type[T]
-
-    def __call__(self, *args, **kwargs) -> T:
-        raise NotImplementedError("This method should be implemented by the subclass")
 
 
 class Header(BaseCustom, Generic[T]):
@@ -34,9 +16,8 @@ class Header(BaseCustom, Generic[T]):
         self.required = required
         self.annotation_type: type[T]
 
-    def __call__(self, request: DjangoHttpRequest) -> T | None:
+    def __call__(self, request: Request) -> T | None:
         headers = request.headers
-        # breakpoint()
 
         if self.param_name and self.param_name in headers:
             if issubclass(self.annotation_type, BaseModel):
