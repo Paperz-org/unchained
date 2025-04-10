@@ -2,7 +2,6 @@ from typing import Annotated
 
 import pytest
 
-from tests.utils.client import UnchainedTestClient
 from unchained import Unchained
 
 
@@ -33,9 +32,7 @@ def setup_routes(api: Unchained) -> None:
         return user
 
     @api.get("/combined")
-    def get_combined_info(
-        request, user: Annotated[dict, get_user], config: Annotated[dict, get_config]
-    ):
+    def get_combined_info(request, user: Annotated[dict, get_user], config: Annotated[dict, get_config]):
         return {"user": user, "config": config}
 
 

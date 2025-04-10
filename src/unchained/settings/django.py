@@ -11,7 +11,7 @@ FIXED_STATIC_ROOT = os.path.join(_BASE_DIR, "static")
 class MergeStrategy(StrEnum):
     MERGE = "merge"
     OVERRIDE = "override"
-  
+
 
 class MandatoryDjangoSettings:
     INSTALLED_APPS = [
@@ -29,16 +29,16 @@ class MandatoryDjangoSettings:
 
     merge_strategy = MergeStrategy.MERGE
 
-    @classmethod    
+    @classmethod
     def as_django_settings(cls) -> Dict[str, Any]:
         settings = {}
         for key, value in cls.__dict__.items():
             if not key.isupper() or key.startswith("_"):
                 continue
             settings[key] = value
-        
+
         return settings
-    
+
     @classmethod
     def get_settings(cls) -> Dict[str, Any]:
         """
@@ -51,31 +51,31 @@ class MandatoryDjangoSettings:
 
         if cls.merge_strategy == MergeStrategy.MERGE:
             final_settings = cls._handle_merge_strategy()
-        else: 
+        else:
             final_settings = cls._handle_override_strategy()
-        
+
         # Ensure mandatory settings
         if "unchained.app" not in final_settings.get("INSTALLED_APPS", []):
             if "INSTALLED_APPS" not in final_settings:
                 final_settings["INSTALLED_APPS"] = []
             final_settings["INSTALLED_APPS"].append("unchained.app")
-        
+
         if "app" not in final_settings.get("MIGRATION_MODULES", {}):
             if "MIGRATION_MODULES" not in final_settings:
                 final_settings["MIGRATION_MODULES"] = {}
             final_settings["MIGRATION_MODULES"]["app"] = "migrations"
-        
+
         if "STATIC_URL" not in final_settings:
             final_settings["STATIC_URL"] = "/static/"
-        
+
         if "STATIC_ROOT" not in final_settings:
             final_settings["STATIC_ROOT"] = FIXED_STATIC_ROOT
-        
+
         return final_settings
-    
+
     @classmethod
     def _handle_merge_strategy(cls) -> Dict[str, Any]:
-        base_settings =  BaseDjangoSettings.as_django_settings()
+        base_settings = BaseDjangoSettings.as_django_settings()
         # Merge settings, with subclass taking precedence
 
         final_settings = base_settings.copy()
@@ -98,17 +98,16 @@ class MandatoryDjangoSettings:
                 final_settings[key] = value
 
         return final_settings
-    
+
     @classmethod
     def _handle_override_strategy(cls) -> Dict[str, Any]:
         return cls.as_django_settings()
-    
 
-    
+
 class DefaultDjangoSettings(MandatoryDjangoSettings):
     merge_strategy = MergeStrategy.MERGE
 
-    DEBUG = True    
+    DEBUG = True
     SECRET_KEY = "your-secret-key-here"
     ALLOWED_HOSTS = ["*"]
     MIDDLEWARE = [
@@ -125,7 +124,7 @@ class DefaultDjangoSettings(MandatoryDjangoSettings):
         "django.contrib.admin",
         "django.contrib.auth",
         "django.contrib.contenttypes",
-        "django.contrib.sessions",  
+        "django.contrib.sessions",
         "django.contrib.staticfiles",
     ]
 
@@ -157,7 +156,6 @@ class DefaultDjangoSettings(MandatoryDjangoSettings):
         "show_ui_builder": True,
         "dark_mode_theme": "darkly",
     }
-
 
 
 class BaseDjangoSettings(MandatoryDjangoSettings):

@@ -12,7 +12,7 @@ app.add_typer(db_app, name="migrations", help="Database migration commands for m
 def _load_app(app_path: Optional[str] = None) -> Tuple[str, Any, Any]:
     """
     Load the application from the given path or detect it automatically.
-    
+
     Returns:
         Tuple containing:
         - app_path_str: The string representation of the app path
@@ -20,10 +20,10 @@ def _load_app(app_path: Optional[str] = None) -> Tuple[str, Any, Any]:
         - instance: The app instance from the module
     """
     from unchained.cli.utils import get_app_path_arg, load_app_module
-    
+
     path = get_app_path_arg(app_path)
     module, instance = load_app_module(path)
-    
+
     return path, module, instance
 
 
@@ -60,7 +60,7 @@ def collectstatic():
 
     call_command("collectstatic", interactive=False, clear=True, link=True)
 
-    
+
 # Add a helper command that doesn't require Django loading
 @app.command()
 def version():
@@ -121,6 +121,7 @@ def createsuperuser(
 
     call_command("createsuperuser", *args, **kwargs)
 
+
 @app.command(name="shell")
 def shell(
     app_path: Optional[str] = Argument(None, help="Path to the app module and instance in the format module:instance"),
@@ -141,6 +142,7 @@ def shell(
     from django.core.management import call_command
 
     call_command("shell")
+
 
 def main():
     app(prog_name="unchained")

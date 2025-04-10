@@ -80,7 +80,7 @@ class AppHandler:
     A class that encapsulates app path finding and module loading functionality.
     Provides the same functionality as the standalone functions but in an OOP approach.
     """
-    
+
     @staticmethod
     def find_app_path():
         """
@@ -109,7 +109,7 @@ class AppHandler:
                         return pyproject["tool"]["unchained"]["app_path"]
 
         return None
-    
+
     @staticmethod
     def get_app_path_arg(value: Optional[str]):
         """Helper method to get app path with automatic detection"""
@@ -123,7 +123,7 @@ class AppHandler:
                 raise Exit(1)
             return detected_path
         return value
-    
+
     @staticmethod
     def load_app_module(app_path: str):
         """Load the app module and get the Unchained instance"""
@@ -151,7 +151,7 @@ class AppHandler:
             sys.exit(1)
         except AttributeError:
             echo(f"Error: Could not find '{app_instance}' in module '{module_path}'")
-    
+
     def __init__(self, app_path: Optional[str] = None):
         """
         Initialize the app handler with an optional app path.
@@ -160,10 +160,8 @@ class AppHandler:
         self.app_path = self.get_app_path_arg(app_path)
         self.module = None
         self.app_instance = None
-    
+
     def load(self):
         """Load the application module and return the module and app instance"""
         self.module, self.app_instance = self.load_app_module(self.app_path)
         return self.module, self.app_instance
-
-

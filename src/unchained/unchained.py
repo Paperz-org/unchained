@@ -1,21 +1,17 @@
 import inspect
 from contextlib import asynccontextmanager, contextmanager
-from contextvars import ContextVar
-from functools import cached_property, wraps
+from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable
 
 from django.db.models import QuerySet
-from django.urls import URLPattern, URLResolver, include, path
-from ninja import NinjaAPI
 
 from unchained.admin import UnchainedAdmin
 from unchained.base import BaseUnchained
 from unchained.lifespan import Lifespan
 from unchained.meta import UnchainedMeta, URLPatterns
+from unchained.settings.base import UnchainedSettings
 from unchained.states import BaseState
-
-app = ContextVar("app", default=None)
-request = ContextVar("request", default=None)
+from unchained import context
 
 
 if TYPE_CHECKING:
@@ -25,6 +21,7 @@ if TYPE_CHECKING:
 class Unchained(BaseUnchained, metaclass=UnchainedMeta):
     APP_NAME = "unchained.app"
     urlpatterns = URLPatterns()
+    settings: UnchainedSettings
 
     def __init__(
         self,
@@ -43,7 +40,7 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
 
         # Call parent init
         super().__init__(**kwargs)
-        app.set(self)
+        context.app.set(self)
 
     def lifespan(self, func: Callable):
         if self._lifespan:
@@ -107,6 +104,7 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
             queryset=queryset,
             operations=operations,
         )
+        self.add_router(router.path, router.router)
 
     def __call__(self, *args, **kwargs):
         from django.conf import settings
