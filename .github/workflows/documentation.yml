@@ -1,0 +1,38 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+name: Build & Deploy Documentation
+on:
+  push:
+    branches:
+      - docs
+  workflow_dispatch:
+  
+permissions:
+  contents: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure Git Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - run: uv pip install --group doc
+      - run: uv run mkdocs gh-deploy --force
