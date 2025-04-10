@@ -1,7 +1,7 @@
-# Models & CRUD Operations
+# Models & Migrations
 
-!!! info "Django Models with CRUD"
-    Unchained provides seamless integration with Django's ORM and automatic CRUD endpoint generation.
+!!! info "Django Models"
+    Unchained provides seamless integration with Django's ORM for model definition and database management.
 
 ## Basic Models
 
@@ -25,94 +25,7 @@
         tags = models.ManyToManyField(Tag)
     ```
 
-## CRUD Operations
-
-=== "Basic CRUD"
-    ```python
-    app.crud(User)  # Generates all CRUD endpoints
-    ```
-
-=== "Customized CRUD"
-    ```python
-    app.crud(
-        User,
-        operations="CRUD",  # Create, Read, Update, Delete
-        path="/users",      # Custom path
-        tags=["Users"]      # API tags
-    )
-    ```
-
-=== "Partial CRUD"
-    ```python
-    app.crud(
-        User,
-        operations="CR",    # Only Create and Read
-        path="/users"
-    )
-    ```
-
-## Custom Schemas
-
-=== "Input Schema"
-    ```python
-    from pydantic import BaseModel
-
-    class UserCreate(BaseModel):
-        name: str
-        email: str
-        password: str
-
-    app.crud(
-        User,
-        create_schema=UserCreate
-    )
-    ```
-
-=== "Output Schema"
-    ```python
-    class UserRead(BaseModel):
-        id: int
-        name: str
-        email: str
-        is_active: bool
-
-    app.crud(
-        User,
-        read_schema=UserRead
-    )
-    ```
-
-## Filtering and Pagination
-
-=== "Filter Schema"
-    ```python
-    class UserFilter(BaseModel):
-        name: str | None = None
-        email: str | None = None
-        is_active: bool | None = None
-
-    app.crud(
-        User,
-        filter_schema=UserFilter
-    )
-    ```
-
-=== "Custom QuerySet"
-    ```python
-    app.crud(
-        User,
-        queryset=User.objects.filter(is_active=True)
-    )
-    ```
-
-## Best Practices
-
-1. **Type Safety**: Always use type hints in schemas
-2. **Validation**: Use Pydantic models for input validation
-3. **Security**: Be careful with sensitive fields
-4. **Performance**: Use select_related/prefetch_related for relationships
-
-## Common Patterns
+## Common Model Patterns
 
 ### Soft Delete
 
@@ -160,48 +73,44 @@ class User(BaseModel):
     active = ActiveUserManager()
 ```
 
-## Example: Complete Model Setup
+## Database Migrations
 
-```python
-from django.db import models
-from pydantic import BaseModel
-from unchained.models.base import BaseModel as UnchainedModel
+Unchained uses Django's migration system to manage database schema changes. After defining or modifying your models, you'll need to create and apply migrations.
 
-# Schemas
-class UserCreate(BaseModel):
-    name: str
-    email: str
-    password: str
+### Creating Migrations
 
-class UserRead(BaseModel):
-    id: int
-    name: str
-    email: str
-    is_active: bool
+To create new migrations based on model changes:
 
-class UserFilter(BaseModel):
-    name: str | None = None
-    email: str | None = None
-    is_active: bool | None = None
+```bash
+unchained migrations create [name]
+```
 
-# Model
-class User(UnchainedModel):
-    name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
-    is_active = models.BooleanField(default=True)
+Where `[name]` is an optional name for the migration (e.g., "add_user_model").
 
-    class Meta:
-        ordering = ["-id"]
+### Applying Migrations
 
-# CRUD Setup
-app.crud(
-    User,
-    create_schema=UserCreate,
-    read_schema=UserRead,
-    filter_schema=UserFilter,
-    operations="CRUD",
-    path="/users",
-    tags=["Users"]
-)
-``` 
+To apply migrations and update your database schema:
+
+```bash
+unchained migrations apply
+```
+
+### Viewing Migration Status
+
+To see which migrations have been applied:
+
+```bash
+unchained migrations show
+```
+
+For detailed information about migration commands and options, see the [CLI documentation](../cli/commands.md#database-migration-commands).
+
+## Best Practices
+
+1. **Use abstract models** for common fields and behavior
+2. **Add Meta options** for ordering, indexes, and constraints
+3. **Create migrations early** to catch model issues
+4. **Keep migrations small** to make deployments safer
+5. **Test migrations** on a copy of production data when possible
+
+For information about generating CRUD endpoints from your models, see the [CRUD documentation](./crud.md). 

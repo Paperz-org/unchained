@@ -75,10 +75,10 @@ Unchained supports both synchronous and asynchronous lifespan handlers:
     @app.lifespan
     async def startup(app: Unchained):
         # Asynchronous startup code
-        await app.state.db.connect()
+        await app.state.http_client.aopen()
         yield
         # Asynchronous shutdown code
-        await app.state.db.disconnect()
+        await app.state.http_client.aclose()
     ```
 
 ## How Lifespan Works in ASGI
@@ -101,10 +101,10 @@ You can define multiple lifespan handlers, and they will be executed in the orde
 
 ```python
 @app.lifespan
-async def db_lifespan(app: Unchained):
-    await app.state.db.connect()
+async def http_client_lifespan(app: Unchained):
+    app.state.http_client = httpx.AsyncClient()
     yield
-    await app.state.db.disconnect()
+    await app.state.http_client.aclose()
 
 @app.lifespan
 async def cache_lifespan(app: Unchained):
@@ -113,8 +113,8 @@ async def cache_lifespan(app: Unchained):
     await app.state.cache.disconnect()
 ```
 
-On startup, the handlers execute in order (db_lifespan then cache_lifespan). 
-On shutdown, they execute in **reverse** order (cache_lifespan cleanup then db_lifespan cleanup).
+On startup, the handlers execute in order (http_client_lifespan then cache_lifespan). 
+On shutdown, they execute in **reverse** order (cache_lifespan cleanup then http_client_lifespan cleanup).
 
 ## Common Use Cases
 
@@ -137,69 +137,36 @@ async def initialize_resources(app: Unchained):
     await app.state.redis.close()
 ```
 
-### Background Tasks
-
-Start and manage background tasks during the application lifecycle:
-
-```python
-@app.lifespan
-async def background_tasks(app: Unchained):
-    # Start background tasks
-    app.state.task = asyncio.create_task(background_worker())
-    yield
-    # Cancel and wait for tasks
-    app.state.task.cancel()
-    try:
-        await app.state.task
-    except asyncio.CancelledError:
-        pass
-```
-
-### Configuration Loading
-
-Load configuration at startup:
-
-```python
-@app.lifespan
-def load_config(app: Unchained):
-    # Load configuration from environment variables
-    app.state.debug = os.getenv("DEBUG", "false").lower() == "true"
-    app.state.api_key = os.getenv("API_KEY")
-    app.state.environment = os.getenv("ENVIRONMENT", "development")
-    
-    yield
-    # No cleanup needed
-```
-
 ## Error Handling
 
-Handle errors properly in lifespan functions:
+When working with lifespan functions, it's important to handle potential errors properly:
 
-=== "Error in Startup"
+=== "Startup Error Handling"
     ```python
     @app.lifespan
     async def startup(app: Unchained):
-        try:
-            await app.state.db.connect()
-            yield
-        except Exception as e:
-            print(f"Startup error: {e}")
-            raise
-        finally:
-            await app.state.db.disconnect()
+        # Initialize client
+        app.state.http_client = httpx.AsyncClient()
+        
+        # Yield control back to the server
+        yield
+        
+        # Always clean up resources
+        await app.state.http_client.aclose()
     ```
 
-=== "Error in Shutdown"
+=== "Shutdown Error Handling"
     ```python
     @app.lifespan
     async def shutdown(app: Unchained):
-        try:
-            yield
-        finally:
-            try:
-                await app.state.db.disconnect()
-            except Exception as e:
-                print(f"Shutdown error: {e}")
+        # Initialize client
+        app.state.http_client = httpx.AsyncClient()
+        
+        # Yield control back to the server
+        yield
+        
+        # Clean up (errors here will be logged but won't crash the application)
+        await app.state.http_client.aclose()
     ```
 
 ## Best Practices

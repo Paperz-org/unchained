@@ -37,6 +37,7 @@ theme:
     - search.suggest
   icon:
     repo: fontawesome/brands/github
+  logo: assets/logo.png
 
 plugins:
   - search
@@ -79,10 +80,18 @@ extra:
 
 nav:
   - Home: index.md
-  - Dependency Injection: dependency-injection/intro.md
-  - CRUD Operations: crud/customizing.md
-  - Advanced Topics:
-    - Middleware: advanced/middleware.md
-    - Response Handling: advanced/custom-responses.md
-    - Authentication: advanced/authentication.md
+  - Quickstart: quickstart.md
+  - Core:
+    - Routing: core/routing.md
+    - Models: core/models.md
+    - Dependency Injection: core/dependency-injection.md
+    - State Management: core/state.md
+    - Admin Interface: core/admin.md
+    - Lifespan: core/lifespan.md
+    - CRUD: core/crud.md
+    - Settings: core/settings.md
+  - CRUD Operations:
+    - Customizing: crud/customizing.md
+  - CLI:
+    - Commands: cli/commands.md
   - Contributing: contributing.md 
