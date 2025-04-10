@@ -4,6 +4,8 @@ from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable
 
 from django.db.models import QuerySet
+from django.urls import path
+
 
 from unchained.admin import UnchainedAdmin
 from unchained.base import BaseUnchained
@@ -30,8 +32,6 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
         state: BaseState | None = None,
         **kwargs,
     ):
-        from django.urls import path
-
         self._path = path
         self.admin = admin or UnchainedAdmin()
         self.state = state or BaseState()
@@ -116,8 +116,3 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
         if settings.DEBUG:
             self.urlpatterns.add(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))
         return self.app
-
-    @staticmethod
-    def is_generator_function(func):
-        """Check if the function is a generator function (uses yield)."""
-        return inspect.isasyncgenfunction(func)
