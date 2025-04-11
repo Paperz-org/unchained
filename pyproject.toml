@@ -1,14 +1,9 @@
 [project]
 name = "unchained"
-<<<<<<< Updated upstream
-version = "0.1.0"
+version = "0.1.5"
 description = "Modern, high-performance Python web framework based on Django."
-=======
-version = "0.1.1"
-description = "Add your description here"
->>>>>>> Stashed changes
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "uvicorn>=0.34.0",
     "fast-depends>=2.4.12",
@@ -32,8 +27,11 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src", "src/django-ninja", "src/ninja-crud"]
-include = ["unchained*", "ninja*", "ninja_crud*"]
+where = ["src", "src/django-ninja"]
+include = ["unchained*", "ninja*"]
+
+[tool.setuptools.package-data]
+ninja = ["templates/**/*"]
 
 [dependency-groups]
 dev = [

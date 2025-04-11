@@ -22,7 +22,7 @@ pip install ninja-crud
 ```python
 from django.contrib.auth.models import User
 from ninja import NinjaAPI
-from lib_ninja_crud import CRUDRouter
+from ninja_crud import CRUDRouter
 
 api = NinjaAPI()
 

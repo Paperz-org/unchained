@@ -91,7 +91,7 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
         queryset: QuerySet | None = None,
         operations: str = "CRUD",
     ):
-        from ninja_crud import CRUDRouter  # type: ignore
+        from unchained.ninja_crud import CRUDRouter  # type: ignore
 
         router = CRUDRouter(
             model,
