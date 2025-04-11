@@ -1,0 +1,6 @@
+[submodule "src/ninja-crud"]
+	path = src/ninja-crud
+	url = https://github.com/Paperz-org/ninja-crud.git
+[submodule "src/django-ninja"]
+	path = src/django-ninja
+	url = https://github.com/mde-pach/django-ninja.git
