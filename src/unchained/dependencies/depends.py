@@ -1,7 +1,8 @@
 from typing import Any, Callable, get_args
-from fast_depends.dependencies import model
-from unchained.signature import Signature
 
+from fast_depends.dependencies import model
+
+from unchained.signature import Signature
 from unchained.signature.transformers import create_signature_with_auto_dependencies
 
 
@@ -17,6 +18,7 @@ class Depends(model.Depends):
         self._update_dependency_signature()
 
     def _update_dependency_signature(self):
+
         signature = Signature.from_callable(self.dependency)
         # Here we inject the param name and the annotation type to CustomDependencies
         for param in signature.parameters.values():

@@ -1,15 +1,17 @@
-from unchained import context
+import asyncio
+import copy
+import functools
 from typing import Callable, get_args
 
 from fast_depends import inject
 
+from unchained import context
 from unchained.dependencies.custom import BaseCustom
 from unchained.signature import Signature
-import functools
-import copy
-import asyncio
-
-from unchained.signature.transformers import create_signature_with_auto_dependencies, create_signature_without_annotated
+from unchained.signature.transformers import (
+    create_signature_with_auto_dependencies,
+    create_signature_without_annotated,
+)
 
 
 class UnchainedBaseMeta(type):
