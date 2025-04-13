@@ -48,7 +48,6 @@ async def multi_header_explicit_async(
 
 
 test_cases = [
-    # Sync Cases
     HeaderTestCase(
         route_func=multi_header_args,
         request_headers={"x-api-key": TEST_API_KEY, "x-client-id": TEST_CLIENT_ID},
@@ -64,7 +63,6 @@ test_cases = [
         request_headers={"X-Api-Key": TEST_API_KEY, "X-Client-ID": TEST_CLIENT_ID},  # Mixed case request headers
         expected_response=ExpectedResponse(status=200, message={"api_key": TEST_API_KEY, "client_id": TEST_CLIENT_ID}),
     ),
-    # Async Cases
     HeaderTestCase(
         route_func=multi_header_args_async,
         request_headers={"x-api-key": TEST_API_KEY, "x-client-id": TEST_CLIENT_ID},

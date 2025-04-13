@@ -98,9 +98,7 @@ test_cases = [
     HeaderTestCase(
         route_func=multi_header_explicit,
         request_headers={"x-api-key": TEST_API_KEY},
-        expected_response=ExpectedResponse(
-            status=422, message={"detail": [{"msg": error_message("x-client-id")}]}
-        ),  # Note: Header name casing
+        expected_response=ExpectedResponse(status=422, message={"detail": [{"msg": error_message("x-client-id")}]}),
     ),
     HeaderTestCase(
         route_func=multi_header_args,
@@ -110,9 +108,7 @@ test_cases = [
     HeaderTestCase(
         route_func=multi_header_explicit,
         request_headers={"x-api-key": TEST_API_KEY},
-        expected_response=ExpectedResponse(
-            status=422, message={"detail": [{"msg": error_message("x-client-id")}]}
-        ),  # Note: Header name casing
+        expected_response=ExpectedResponse(status=422, message={"detail": [{"msg": error_message("x-client-id")}]}),
     ),
     # Multiple missing headers (both missing - marked xfail)
     # HeaderTestCase(
@@ -155,9 +151,7 @@ test_cases = [
     HeaderTestCase(
         route_func=multi_header_explicit_async,
         request_headers={"x-api-key": TEST_API_KEY},
-        expected_response=ExpectedResponse(
-            status=422, message={"detail": [{"msg": error_message("x-client-id")}]}
-        ),  # Note: Header name casing
+        expected_response=ExpectedResponse(status=422, message={"detail": [{"msg": error_message("x-client-id")}]}),
     ),
     HeaderTestCase(
         route_func=multi_header_args_async,
@@ -167,9 +161,7 @@ test_cases = [
     HeaderTestCase(
         route_func=multi_header_explicit_async,
         request_headers={"x-api-key": TEST_API_KEY},
-        expected_response=ExpectedResponse(
-            status=422, message={"detail": [{"msg": error_message("x-client-id")}]}
-        ),  # Note: Header name casing
+        expected_response=ExpectedResponse(status=422, message={"detail": [{"msg": error_message("x-client-id")}]}),
     ),
     # Multiple missing headers (both missing - marked xfail)
     # HeaderTestCase(
@@ -200,8 +192,6 @@ def test_missing_headers_sync(
     case: HeaderTestCase,
 ) -> None:
     # Arrange
-    # if case.xfail:
-    #     pytest.xfail(case.xfail)
     getattr(app, method)("/")(case.route_func)
 
     # Act
@@ -222,8 +212,6 @@ async def test_missing_headers_async(
     case: HeaderTestCase,
 ) -> None:
     # Arrange
-    # if case.xfail:
-    #     pytest.xfail(case.xfail)
     getattr(app, method)("/")(case.route_func)
 
     # Act
