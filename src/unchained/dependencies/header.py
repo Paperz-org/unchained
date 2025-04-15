@@ -9,11 +9,14 @@ from unchained.errors import ValidationError
 T = TypeVar("T")
 
 
-class Header(BaseCustom, Generic[T]):
+class Header(BaseCustom[T], Generic[T]):
     _param_name: str
-    def __init__(self, name: str | None = None, required: bool = True):
+    _default: T | None
+
+    def __init__(self, name: str | None = None, required: bool = True, default: T | None = None):
         super().__init__()
         self._name = name
+        self._default = default
         self.required = required
         self.annotation_type: type[T]
 
@@ -26,6 +29,9 @@ class Header(BaseCustom, Generic[T]):
             else:
                 return self.annotation_type(headers[name])  # type: ignore
 
+        default = self._default or self.default
+        if default is not None:
+            return default
         if self.required:
             raise ValidationError([{"msg": f"Missing header: {name.lower()}"}])
 

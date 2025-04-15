@@ -18,7 +18,6 @@ class Depends(model.Depends):
         self._update_dependency_signature()
 
     def _update_dependency_signature(self):
-
         signature = Signature.from_callable(self.dependency)
         # Here we inject the param name and the annotation type to CustomDependencies
         for param in signature.parameters.values():
@@ -27,6 +26,8 @@ class Depends(model.Depends):
                 # Add the type to the CustomField
                 setattr(instance, "param_name", param.name)
                 setattr(instance, "annotation_type", type_)
+                setattr(instance, "default", param.default)
+                # if param.default:
 
         # This transform the signature of the dependency to add the auto dependencies (request, settings, app, state)
         self.dependency.__signature__ = create_signature_with_auto_dependencies(signature)
