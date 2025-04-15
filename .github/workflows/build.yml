@@ -25,13 +25,15 @@ jobs:
           version: "latest"
 
       - name: Install dependencies
-        run: uv sync --system-site-packages
+        run: |
+          git submodule update --init
+          uv sync
 
       - name: Build the project
         run: python3 -m build
 
       - name: debug
-        run: uv run python3 -m setuptools_scm
+        run: python3 -m setuptools_scm
 
       # - name: Publish package distributions to PyPI
       #   uses: pypa/gh-action-pypi-publish@release/v1
