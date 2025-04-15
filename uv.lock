@@ -1292,7 +1292,7 @@ wheels = [
 
 [[package]]
 name = "unchained"
-version = "0.0.2.dev29+g25f8b4b.d20250415"
+version = "0.0.2.dev30+g78af030.d20250415"
 source = { editable = "." }
 dependencies = [
     { name = "django-jazzmin" },

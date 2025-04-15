@@ -57,7 +57,7 @@ doc = [
 ]
 
 [tool.mypy]
-files = ["src/"]
+files = ["src/unchained"]
 
 [tool.ruff]
 line-length = 120
