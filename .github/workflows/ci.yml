@@ -1,0 +1,23 @@
+name: CI
+
+
+on:
+  push:
+    branches:
+      - 'feature/add-build-ci'
+    tags:
+      - '*'
+
+jobs:
+
+  lint:
+    permissions:
+      id-token: write
+    uses: ./.github/workflows/lint.yml
+
+  build:
+    permissions:
+      id-token: write
+    needs: lint
+    uses: ./.github/workflows/build.yml
+

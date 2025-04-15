@@ -1,12 +1,37 @@
+name: Build CI
+on:
+  workflow_call:
+
 jobs:
-  pypi-publish:
-    name: Upload release to PyPI
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/unchained
     permissions:
       id-token: write
+
     steps:
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build package
+        run: python3 -m pip install build setuptools_scm
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --system-site-packages
+
+      - name: Build the project
+        run: python3 -m build
+
+      - name: debug
+        run: uv run python3 -m setuptools_scm
+
+      # - name: Publish package distributions to PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
