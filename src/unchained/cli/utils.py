@@ -28,8 +28,9 @@ def find_app_path():
             if "tool" in pyproject and "unchained" in pyproject["tool"]:
                 if "app_path" in pyproject["tool"]["unchained"]:
                     return pyproject["tool"]["unchained"]["app_path"]
-
-    return None
+    
+    # If no app path is found, return a default value
+    return "main:app"
 
 
 def get_app_path_arg(value: Optional[str]):

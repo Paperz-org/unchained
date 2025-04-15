@@ -1,10 +1,31 @@
 from typing import Optional
+import os
+from pathlib import Path
 
-from typer import Argument, Typer, echo
+from typer import Argument, Typer, echo, Exit
 
 from unchained.cli.utils import get_app_path_arg, load_app_module
 
 app = Typer(help="Database management commands for schema migrations and maintenance")
+
+
+def create_migration_directory():
+    """Check if the required directory exists before running any command"""
+    from unchained.settings import settings
+
+    migrations_dir = settings.django.app_migration_module()
+    if not os.path.isdir(migrations_dir):
+        # Create the directory and an __init__.py file inside it
+        os.makedirs(migrations_dir, exist_ok=True)
+        init_file = os.path.join(migrations_dir, "__init__.py")
+        with open(init_file, "w") as f:
+            pass  # Create empty file
+
+
+@app.callback()
+def before_command():
+    """Runs before any command."""
+    create_migration_directory()
 
 
 @app.command(name="create")
@@ -110,6 +131,7 @@ def showmigration(
     if not settings.configured:
         echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
         return
+    
 
     from django.core.management import call_command
 
