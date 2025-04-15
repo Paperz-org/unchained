@@ -61,6 +61,9 @@ files = ["src/"]
 
 [tool.ruff]
 line-length = 120
+exclude = [
+    "src/django-ninja",
+]
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
