@@ -1,6 +1,6 @@
 [project]
 name = "unchained"
-version = "0.1.5"
+dynamic = ["version"]
 description = "Modern, high-performance Python web framework based on Django."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -23,7 +23,7 @@ authors = [
 unchained = "unchained.cli:main"
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
@@ -61,3 +61,6 @@ files = ["src/"]
 
 [tool.ruff]
 line-length = 120
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
