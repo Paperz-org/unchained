@@ -26,6 +26,9 @@ class Header(BaseCustom, Generic[T]):
         if self.param_name and self.param_name in headers:
             return self.annotation_type(headers[self.param_name])  # type: ignore
 
+        if self.default is not None:
+            return self.default
+
         if self.required:
             raise ValidationError([{"msg": f"Missing header: {self.param_name}"}])
 

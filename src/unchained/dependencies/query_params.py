@@ -32,6 +32,9 @@ class QueryParams(BaseCustom, Generic[T]):
             else:
                 return self.annotation_type(query_params[self.param_name])  # type: ignore
 
+        if self.default is not None:
+            return self.default
+
         if self.required:
             raise ValidationError([{"msg": f"Missing query parameter: {self.param_name}"}])
 
