@@ -40,6 +40,24 @@ class Parameter(inspect.Parameter):
         return issubclass(self.annotation, BaseUnchained)
 
     @property
+    def is_header(self) -> bool:
+        from unchained.dependencies.header import Header
+
+        if self.is_annotated:
+            _, instance = get_args(self.annotation)
+            return isinstance(instance, Header)
+        return issubclass(self.annotation, Header)
+    
+    @property
+    def is_query_params(self) -> bool:
+        from unchained.dependencies.query_params import QueryParams
+
+        if self.is_annotated:
+            _, instance = get_args(self.annotation)
+            return isinstance(instance, QueryParams)
+        return issubclass(self.annotation, QueryParams)
+
+    @property
     def is_state(self) -> bool:
         if self.is_annotated:
             _, instance = get_args(self.annotation)

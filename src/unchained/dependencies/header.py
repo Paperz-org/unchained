@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, cast
+from typing import Annotated, Generic, TypeVar, cast
 
 from ninja.errors import ValidationError
 from pydantic import BaseModel
@@ -15,6 +15,7 @@ class Header(BaseCustom, Generic[T]):
         self.param_name = param_name
         self.required = required
         self.annotation_type: type[T]
+        self.default: type[T]
 
     def __call__(self, request: Request) -> T | None:
         headers = request.headers
@@ -29,3 +30,5 @@ class Header(BaseCustom, Generic[T]):
             raise ValidationError([{"msg": f"Missing header: {self.param_name}"}])
 
         return None
+
+

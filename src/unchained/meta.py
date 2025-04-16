@@ -37,6 +37,7 @@ class UnchainedBaseMeta(type):
                                 if isinstance(instance, BaseCustom):
                                     setattr(instance, "param_name", param_name)
                                     setattr(instance, "annotation_type", type_)
+                                    setattr(instance, "default", param.default)
 
                         signature_with_auto_dependencies = create_signature_with_auto_dependencies(signature)
 

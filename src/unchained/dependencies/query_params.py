@@ -1,16 +1,13 @@
-from typing import Any, Generic, TypeVar, cast, get_origin
+from typing import Generic, TypeVar, cast, get_origin
 
 from ninja.errors import ValidationError
 from pydantic import BaseModel
 
-from unchained import Request
+from unchained.request import Request
 from unchained.dependencies.custom import BaseCustom
-from django.http import HttpRequest as DjangoHttpRequest
 T = TypeVar("T")
 
-class OtherRequest(DjangoHttpRequest):
-    def toto(self):
-        return "toto"
+
 
 class QueryParams(BaseCustom, Generic[T]):
     ITERABLES = (list, tuple, set)
