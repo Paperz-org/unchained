@@ -67,4 +67,4 @@ exclude = [
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
-git_describe_command = ['git', 'describe', '--tags', '--match', '*[0-9]*']
+git_describe_command = ['git', 'describe', '--tags', '--long', '--match', '*[0-9]*']
