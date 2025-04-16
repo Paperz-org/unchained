@@ -19,11 +19,11 @@ class Header(BaseCustom, Generic[T]):
     def __call__(self, request: Request) -> T | None:
         headers = request.headers
 
+        if issubclass(self.annotation_type, BaseModel):
+            return cast(T, self.annotation_type.model_validate(headers))
+
         if self.param_name and self.param_name in headers:
-            if issubclass(self.annotation_type, BaseModel):
-                return cast(T, self.annotation_type.model_validate(headers))
-            else:
-                return self.annotation_type(headers[self.param_name])  # type: ignore
+            return self.annotation_type(headers[self.param_name])  # type: ignore
 
         if self.required:
             raise ValidationError([{"msg": f"Missing header: {self.param_name}"}])

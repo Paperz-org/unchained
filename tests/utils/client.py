@@ -12,12 +12,10 @@ class UnchainedTestClient(NinjaTestClient):
 
 class UnchainedAsyncTestClient(NinjaAsyncTestClient):
     async def _call(self, func: Callable, request: Mock, kwargs: Dict) -> "NinjaResponse":
-        # breakpoint()
         res = await func(request, **kwargs)
         return NinjaResponse(res)
 
     def _resolve(self, method: str, path: str, data: Dict, request_params: Any) -> Tuple[Callable, Mock, Dict]:
-        # breakpoint()
         url_path = path.split("?")[0].lstrip("/")
         for url in self.urls:
             match = url.resolve(url_path)

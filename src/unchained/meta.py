@@ -4,6 +4,7 @@ from typing import Callable, get_args
 from fast_depends import inject
 
 from unchained.dependencies.custom import BaseCustom
+from unchained.request import Request
 from unchained.signature import Signature
 import functools
 import copy
@@ -52,6 +53,13 @@ class UnchainedBaseMeta(type):
 
                             # Get the request parameter
                             request = func_args[0]
+
+                            # This is a trick to override the class of the request ... After the instanciation
+                            # `request` is an ASGIRequest instance from Django.
+                            # `Request` is our custom class, that inherit from ASGIRequest.
+                            # With this trick, we are changing the type of the instance
+                            # It like ... inheritence in the future ¯\_(ツ)_/¯
+                            request.__class__ = Request
 
                             # Set the context request in ContextVar
                             context.request.set(request)
