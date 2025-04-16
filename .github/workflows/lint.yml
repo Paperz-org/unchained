@@ -7,42 +7,18 @@ jobs:
     name: Ruff
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: "latest"
-
-      - name: Install dependencies
-        run: uv sync --all-extras
-
-      - name: Lint with Ruff
-        run: uv run ruff check .
+    - name: Run Ruff Linter
+      uses: ./.github/actions/ruff
 
   mypy:
     name: MyPy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          version: "latest"
-
-      - name: Install dependencies
-        run: uv sync --all-extras
-
-      - name: Check types with MyPy
-        run: uv run mypy
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Run MyPy Type Checker
+        uses: ./.github/actions/mypy

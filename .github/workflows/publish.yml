@@ -1,0 +1,55 @@
+name: Publish Python Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'The target environment'
+        required: true
+        type: choice
+        options:
+          - pypi
+          - testpypi
+      version:
+        description: 'The version of the package'
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      environment:
+        description: 'The target environment (e.g., pypi, testpypi)'
+        required: true
+        type: string
+      version:
+        description: 'The version of the package'
+        required: true
+        type: string
+
+
+jobs:
+  publish:
+    name: Publish to ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/unchained
+
+    permissions:
+      id-token: write 
+
+    steps:
+      - name: Download package distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: dist/
+
+      - name: Publish to testpypi
+        if: ${{ inputs.environment == 'testpypi' }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+      - name: Publish to pypi
+        if: ${{ inputs.environment == 'pypi' }}
+        uses: pypa/gh-action-pypi-publish@release/v1

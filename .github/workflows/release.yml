@@ -1,0 +1,16 @@
+on:
+  push:
+    tags:
+      - '*'
+  pull_request:
+
+jobs:
+  lint:
+    permissions:
+      id-token: write
+    uses: ./.github/workflows/lint.yml
+
+  build-and-publish:
+    permissions:
+      id-token: write
+    uses: ./.github/workflows/build-and-publish.yml

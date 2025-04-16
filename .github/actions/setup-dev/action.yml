@@ -1,0 +1,21 @@
+name: 'Setup Lint Environment'
+description: 'Checks out code, sets up Python and uv, installs dependencies.'
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        version: "latest"
+
+    - name: Install dependencies
+      shell: bash
+      run: uv sync --all-extras 

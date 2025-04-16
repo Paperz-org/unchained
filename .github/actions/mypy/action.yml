@@ -1,0 +1,11 @@
+name: 'Run MyPy Type Checker'
+description: 'Sets up environment and runs mypy.'
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Lint Environment
+      uses: ./.github/actions/setup-dev
+
+    - name: Check types with MyPy
+      shell: bash
+      run: uv run mypy

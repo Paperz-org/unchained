@@ -1,0 +1,58 @@
+name: 'Build the package'
+outputs:
+  version:
+    description: 'The version of the package'
+    value: ${{ steps.get-version.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install build package
+      shell: bash
+      run: python3 -m pip install build setuptools_scm
+
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v1
+      with:
+        version: "latest"
+
+    - name: Install dependencies with uv
+      shell: bash
+      run: uv sync
+
+    - name: Cache dist directory
+      id: cache-dist
+      uses: actions/cache@v4
+      with:
+        path: dist/
+        key: dist-${{ github.sha }}
+
+    - name: Get package version
+      id: get-version
+      shell: bash
+      run: echo "version=$(python3 -m setuptools_scm)" >> $GITHUB_OUTPUT
+
+    - name: Build the project
+      id: build
+      if: steps.cache-dist.outputs.cache-hit != 'true'
+      shell: bash
+      run: python3 -m build
+
+    - name: Store the built package
+      uses: actions/upload-artifact@v4
+      if: steps.cache-dist.outputs.cache-hit != 'true'
+      with:
+        name: ${{ steps.get-version.outputs.version }}
+        path: dist/
+        retention-days: 1
+

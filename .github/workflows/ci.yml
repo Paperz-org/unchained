@@ -1,23 +1,22 @@
 name: CI
 
-
 on:
   push:
-    branches:
-      - 'feature/add-build-ci'
-    tags:
-      - '*'
 
 jobs:
-
   lint:
     permissions:
       id-token: write
     uses: ./.github/workflows/lint.yml
 
   build:
+    name: Build
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
-    # needs: lint
-    uses: ./.github/workflows/build.yml
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
+      # - name: Build
+      #   uses: ./.github/actions/build
