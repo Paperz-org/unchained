@@ -3,21 +3,32 @@ name: Publish Python Package
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'The target environment'
+      environment-name:
+        description: 'The target environment (e.g., pypi, testpypi)'
         required: true
         type: choice
         options:
           - pypi
           - testpypi
+      environment-url:
+        description: 'The URL of the environment'
+        required: true
+        type: choice
+        options:
+          - https://pypi.org/p/unchained
+          - https://test.pypi.org/p/unchained
       version:
         description: 'The version of the package'
         required: true
         type: string
   workflow_call:
     inputs:
-      environment:
+      environment-name:
         description: 'The target environment (e.g., pypi, testpypi)'
+        required: true
+        type: string
+      environment-url:
+        description: 'The URL of the environment'
         required: true
         type: string
       version:
@@ -28,11 +39,11 @@ on:
 
 jobs:
   publish:
-    name: Publish to ${{ inputs.environment }}
+    name: Publish to ${{ inputs.environment-name }}
     runs-on: ubuntu-latest
     environment:
-      name: ${{ inputs.environment }}
-      url: https://pypi.org/p/unchained
+      name: ${{ inputs.environment-name }}
+      url: ${{ inputs.environment-url }}
 
     permissions:
       id-token: write 
@@ -45,11 +56,12 @@ jobs:
           path: dist/
 
       - name: Publish to testpypi
-        if: ${{ inputs.environment == 'testpypi' }}
+        if: ${{ inputs.environment-name == 'testpypi' }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          verbose: true
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish to pypi
-        if: ${{ inputs.environment == 'pypi' }}
+        if: ${{ inputs.environment-name == 'pypi' }}
         uses: pypa/gh-action-pypi-publish@release/v1
