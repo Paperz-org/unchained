@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get CI Workflow Run Conclusion
         id: ci_status
         uses: poteto/get-workflow-run-conclusion@v1.0.1
         with:
