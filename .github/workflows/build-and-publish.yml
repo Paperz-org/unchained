@@ -3,6 +3,16 @@ name: Build and publish
 on:
   workflow_call:
 
+outputs:
+  version:
+    description: 'The version of the package'
+    required: true
+    type: string
+  installation-command:
+    description: 'The installation command for the package'
+    required: true
+    type: string
+
 jobs:
   build:
     name: Build
