@@ -16,27 +16,26 @@ class QueryParams(BaseCustom, Generic[T]):
         super().__init__()
         self.param_name = param_name
         self.required = required
-        self.annotation_type: type[T]
-        self.default: type[T]
 
     def __call__(self, request: Request) -> T | None:
         query_params = request.query_params()
+        param_name = self.param_name or self.signature_param_name 
 
         if issubclass(self.annotation_type, BaseModel):
             model_input = self._get_model_values(query_params)
             return cast(T, self.annotation_type.model_validate(model_input))
 
-        if self.param_name and self.param_name in query_params:
+        if param_name and param_name in query_params:
             if issubclass(self.annotation_type, list):
-                return self.annotation_type(query_params.getlist(self.param_name))  # type: ignore
+                return self.annotation_type(query_params.getlist(param_name))  # type: ignore
             else:
-                return self.annotation_type(query_params[self.param_name])  # type: ignore
+                return self.annotation_type(query_params[param_name])  # type: ignore
 
         if self.default is not None:
             return self.default
 
         if self.required:
-            raise ValidationError([{"msg": f"Missing query parameter: {self.param_name}"}])
+            raise ValidationError([{"msg": f"Missing query parameter: {param_name}"}])
 
         return None
     

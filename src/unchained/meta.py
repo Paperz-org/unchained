@@ -35,7 +35,7 @@ class UnchainedBaseMeta(type):
                             if param.is_custom_depends:
                                 type_, instance = get_args(param.annotation)
                                 if isinstance(instance, BaseCustom):
-                                    setattr(instance, "param_name", param_name)
+                                    setattr(instance, "signature_param_name", param_name)
                                     setattr(instance, "annotation_type", type_)
                                     setattr(instance, "default", param.default)
 

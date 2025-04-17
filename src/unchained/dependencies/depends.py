@@ -23,7 +23,7 @@ class Depends(model.Depends):
             if param.is_custom_depends:
                 type_, instance = get_args(param.annotation)
                 # Add the type to the CustomField
-                setattr(instance, "param_name", param.name)
+                setattr(instance, "signature_param_name", param.name)
                 setattr(instance, "annotation_type", type_)
                 setattr(instance, "default", param.default)
 

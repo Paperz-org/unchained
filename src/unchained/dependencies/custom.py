@@ -22,3 +22,4 @@ class BaseCustom(Depends, Generic[T]):
         self.param_name: str | None = None
         self.annotation_type: type[T]
         self.default: type[T]
+        self.signature_param_name: str | None = None
