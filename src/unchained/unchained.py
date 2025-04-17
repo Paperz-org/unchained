@@ -25,17 +25,20 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
 
     def __init__(
         self,
+        title: str = "Unchained",
+        base_url: str = "api/",
         admin: UnchainedAdmin | None = None,
         lifespan: Callable | None = None,
         state: BaseState | None = None,
         **kwargs,
     ):
         self._path = path
+        self._base_url = base_url
         self.admin = admin or UnchainedAdmin()
         self.state = state or BaseState()
 
         self._lifespan = self._wrap_lifespan(lifespan) if lifespan else None
-        super().__init__(**kwargs, docs=UnchainedSwagger())
+        super().__init__(**kwargs, docs=UnchainedSwagger(), title=title)
         context.app.set(self)
 
     def lifespan(self, func: Callable):
@@ -107,7 +110,7 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
         from django.conf.urls.static import static
         from django.contrib import admin
 
-        self.urlpatterns.add(self._path("api/", self.urls))
+        self.urlpatterns.add(self._path(self._base_url, self.urls))
         self.urlpatterns.add(self._path("admin/", admin.site.urls))
         if settings.DEBUG:
             self.urlpatterns.add(static(settings.STATIC_URL, document_root=settings.STATIC_ROOT))
