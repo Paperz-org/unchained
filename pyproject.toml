@@ -1,7 +1,7 @@
 [project]
 name = "unchained"
 dynamic = ["version"]
-description = "Modern, high-performance Python web framework based on Django."
+description = "Modern, developer-friendly and velocity oriented Python web framework based on Django."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -58,11 +58,16 @@ doc = [
 
 [tool.mypy]
 files = ["src/unchained"]
+exclude = [
+    "src/unchained/ninja",
+    "src/unchained/ninja_crud",
+]
 
 [tool.ruff]
 line-length = 120
 exclude = [
-    "src/django-ninja",
+    "src/unchained/ninja",
+    "src/unchained/ninja_crud",
 ]
 
 [tool.setuptools_scm]
