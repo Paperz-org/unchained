@@ -31,13 +31,6 @@ runs:
       shell: bash
       run: uv sync
 
-    - name: Cache dist directory
-      id: cache-dist
-      uses: actions/cache@v4
-      with:
-        path: dist/
-        key: dist-${{ github.sha }}
-
     - name: Get package version
       id: get-version
       shell: bash
