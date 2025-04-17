@@ -60,8 +60,11 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
+          attestations: false
           repository-url: https://test.pypi.org/legacy/
 
       - name: Publish to pypi
         if: ${{ inputs.environment-name == 'pypi' }}
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: false
