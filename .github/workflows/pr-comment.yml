@@ -1,0 +1,68 @@
+name: PR Commenter
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          # Get the latest tag, suppress errors if no tags exist
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+        shell: bash
+        continue-on-error: true
+
+      - name: Construct Comment Body
+        id: comment_body
+        run: |
+          COMMENT_IDENTIFIER="<!-- PIP_INSTALL_INSTRUCTIONS -->"
+          PR_NUMBER=${{ github.event.number }}
+          REPO_NAME=${{ github.repository }}
+          COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+          LATEST_TAG="${{ steps.get_latest_tag.outputs.tag }}"
+
+          COMMENT_BODY=$(cat <<EOF
+          $COMMENT_IDENTIFIER
+
+          ### Installation Instructions (Preview)
+
+          You can install the version from this Pull Request (#$PR_NUMBER) using pip:
+
+          \`\`\`bash
+          pip install git+$GITHUB_SERVER_URL/$REPO_NAME@$COMMIT_SHA
+          \`\`\`
+
+          **Latest commit SHA:** \`$COMMIT_SHA\`
+
+          **Latest release:** ${LATEST_TAG:-_No releases found_}
+
+          *Note: This comment is automatically updated on new commits.*
+          EOF
+          )
+          # Escape special characters for JSON compatibility if needed (though typically handled by the action)
+          # Make the comment body available as a multiline output
+          echo "body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$COMMENT_BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "identifier=$COMMENT_IDENTIFIER" >> "$GITHUB_OUTPUT"
+
+      - name: Post or Update PR Comment
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          message: ${{ steps.comment_body.outputs.body }}
+          comment_identifier: ${{ steps.comment_body.outputs.identifier }}
+          pr_number: ${{ github.event.number }}
