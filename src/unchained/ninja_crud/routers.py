@@ -4,10 +4,11 @@ import functools
 from typing import Callable, Generic, cast, get_type_hints
 
 from django.db.models import QuerySet
-from ninja import FilterSchema, Router, Schema
-from ninja.orm import create_schema as generate_schema
-from ninja.orm.fields import TYPES as NINJA_TYPES_MAP
 from pydantic import Field, create_model
+
+from unchained.ninja import FilterSchema, Router, Schema
+from unchained.ninja.orm import create_schema as generate_schema
+from unchained.ninja.orm.fields import TYPES as NINJA_TYPES_MAP
 
 from .types import (
     CreateSchemaType,

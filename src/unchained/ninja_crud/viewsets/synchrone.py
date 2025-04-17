@@ -4,8 +4,9 @@ from typing import Callable, cast
 
 from django.db.models import QuerySet
 from django.http import HttpRequest
-from ninja import Query
-from ninja.pagination import paginate
+
+from unchained.ninja import Query
+from unchained.ninja.pagination import paginate
 
 from ..decorators import rename_parameter as rename
 from ..exceptions import BadRequest, EntryNotFound

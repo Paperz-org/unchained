@@ -3,7 +3,8 @@
 from typing import TypeVar
 
 from django.db import models
-from ninja import FilterSchema, Schema
+
+from unchained.ninja import FilterSchema, Schema
 
 ModelType = TypeVar("ModelType", bound=models.Model)
 CreateSchemaType = TypeVar("CreateSchemaType", bound=Schema)

@@ -6,15 +6,13 @@ from typing import TYPE_CHECKING, Any, Callable
 from django.db.models import QuerySet
 from django.urls import path
 
-
+from unchained import context
 from unchained.admin import UnchainedAdmin
 from unchained.base import BaseUnchained
 from unchained.lifespan import Lifespan
 from unchained.meta import UnchainedMeta, URLPatterns
 from unchained.settings.base import UnchainedSettings
 from unchained.states import BaseState
-from unchained import context
-
 
 if TYPE_CHECKING:
     from .models.base import BaseModel

@@ -1,9 +1,9 @@
 from typing import Any, Callable, Dict, Tuple
 from unittest.mock import Mock
 
-from ninja.testing import TestAsyncClient as NinjaAsyncTestClient
-from ninja.testing import TestClient as NinjaTestClient
-from ninja.testing.client import NinjaResponse
+from unchained.ninja.testing import TestAsyncClient as NinjaAsyncTestClient
+from unchained.ninja.testing import TestClient as NinjaTestClient
+from unchained.ninja.testing.client import NinjaResponse
 
 
 class UnchainedTestClient(NinjaTestClient):

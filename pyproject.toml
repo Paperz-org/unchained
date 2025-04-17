@@ -27,8 +27,8 @@ requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src", "src/django-ninja"]
-include = ["unchained*", "ninja*"]
+where = ["src"]
+include = ["unchained*"]
 
 [tool.setuptools.package-data]
 ninja = ["templates/**/*"]
