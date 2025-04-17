@@ -1,0 +1,24 @@
+name: Lint
+on:
+  workflow_call:
+
+jobs:
+  ruff:
+    name: Ruff
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Run Ruff Linter
+      uses: ./.github/actions/ruff
+
+  mypy:
+    name: MyPy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Run MyPy Type Checker
+        uses: ./.github/actions/mypy

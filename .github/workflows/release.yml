@@ -1,0 +1,13 @@
+on:
+  push:
+    tags:
+      - 'v*'
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-publish:
+    permissions:
+      id-token: write
+    uses: ./.github/workflows/build-and-publish.yml

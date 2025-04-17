@@ -1,0 +1,11 @@
+name: 'Run Ruff Linter/Formatter'
+description: 'Sets up environment and runs ruff check.'
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Lint Environment
+      uses: ./.github/actions/setup-dev
+
+    - name: Lint with Ruff
+      shell: bash
+      run: uv run ruff check .

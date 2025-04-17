@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from ninja.errors import HttpError
+from unchained.ninja.errors import HttpError
 
 from .types import ModelType
 

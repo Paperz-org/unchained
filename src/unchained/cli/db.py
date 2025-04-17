@@ -1,8 +1,7 @@
-from typing import Optional
 import os
-from pathlib import Path
+from typing import Optional
 
-from typer import Argument, Typer, echo, Exit
+from typer import Argument, Typer, echo
 
 from unchained.cli.utils import get_app_path_arg, load_app_module
 
@@ -18,7 +17,7 @@ def create_migration_directory():
         # Create the directory and an __init__.py file inside it
         os.makedirs(migrations_dir, exist_ok=True)
         init_file = os.path.join(migrations_dir, "__init__.py")
-        with open(init_file, "w") as f:
+        with open(init_file, "w"):
             pass  # Create empty file
 
 

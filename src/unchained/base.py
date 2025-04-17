@@ -1,4 +1,4 @@
-from ninja import NinjaAPI
+from unchained.ninja import NinjaAPI
 
 
 class BaseUnchained(NinjaAPI): ...

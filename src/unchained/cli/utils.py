@@ -69,11 +69,14 @@ def load_app_module(app_path: str):
             module_path = module_path[:-3]
         module = importlib.import_module(module_path)
         return module, getattr(module, app_instance)
-    except ImportError:
+    except ImportError as e:
         echo(f"Error: Could not import module '{module_path}'")
+        echo(f"Error: {e}")
         sys.exit(1)
-    except AttributeError:
+    except AttributeError as e:
         echo(f"Error: Could not find '{app_instance}' in module '{module_path}'")
+        echo(f"Error: {e}")
+        sys.exit(1)
 
 
 class AppHandler:
@@ -99,6 +102,7 @@ class AppHandler:
 
         # Check pyproject.toml
         from pathlib import Path
+
         import tomli
 
         pyproject_path = Path("pyproject.toml")
@@ -131,6 +135,7 @@ class AppHandler:
         # Ensure the current directory is in the Python path
         import importlib
         import sys
+
         from typer import echo
 
         if "" not in sys.path:

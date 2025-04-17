@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  lint:
+    permissions:
+      id-token: write
+    uses: ./.github/workflows/lint.yml
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4

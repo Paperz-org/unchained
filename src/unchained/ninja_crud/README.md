@@ -21,8 +21,8 @@ pip install ninja-crud
 
 ```python
 from django.contrib.auth.models import User
-from ninja import NinjaAPI
-from ninja_crud import CRUDRouter
+from unchained.ninja import NinjaAPI
+from unchained.ninja_crud import CRUDRouter
 
 api = NinjaAPI()
 
@@ -49,7 +49,7 @@ You can define custom schemas for different operations:
 
 ```python
 from pydantic import BaseModel
-from ninja import Schema
+from unchained.ninja import Schema
 
 class UserCreate(Schema):
     username: str
@@ -101,7 +101,7 @@ users_router = CRUDRouter(User, queryset=queryset, path="users")
 You can define a custom filter schema:
 
 ```python
-from ninja import FilterSchema
+from unchained.ninja import FilterSchema
 
 class UserFilter(FilterSchema):
     username: str = None

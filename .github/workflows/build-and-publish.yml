@@ -1,0 +1,44 @@
+name: Build and publish
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        id: build
+        uses: ./.github/actions/build
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    if: '!startsWith(github.ref, ''refs/tags/'')'
+    uses: ./.github/workflows/publish.yml
+    with:
+      environment-name: testpypi
+      environment-url: https://test.pypi.org/p/unchained
+      version: ${{ needs.build.outputs.version }}
+    secrets: inherit
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: publish-testpypi
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/publish.yml
+    with:
+      environment-name: pypi
+      environment-url: https://pypi.org/p/unchained
+      version: ${{ needs.build.outputs.version }}
+    secrets: inherit

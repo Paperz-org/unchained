@@ -37,7 +37,7 @@ When adding authentication to your Unchained application:
 
 !!! example "Django Ninja Example"
     ```python
-    from ninja.security import HttpBearer
+    from unchained.ninja.security import HttpBearer
     from unchained import Unchained
     
     class AuthBearer(HttpBearer):
