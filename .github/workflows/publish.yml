@@ -31,7 +31,7 @@ jobs:
     name: Publish to ${{ inputs.environment }}
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      name: ${{ inputs.environment }}
       url: https://pypi.org/p/unchained
 
     permissions:
