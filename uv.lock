@@ -1293,7 +1293,11 @@ wheels = [
 
 [[package]]
 name = "unchained"
+<<<<<<< Updated upstream
 version = "0.1.5"
+=======
+version = "0.1.7.dev0"
+>>>>>>> Stashed changes
 source = { editable = "." }
 dependencies = [
     { name = "django-jazzmin" },
