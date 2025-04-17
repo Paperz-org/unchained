@@ -28,15 +28,14 @@ jobs:
       - name: Construct Comment Body
         id: comment_body
         run: |
-          COMMENT_IDENTIFIER="<!-- PIP_INSTALL_INSTRUCTIONS -->"
+          COMMENT_TAG="pip-install-comment" # Simple tag for the action
           PR_NUMBER=${{ github.event.number }}
           REPO_NAME=${{ github.repository }}
           COMMIT_SHA=${{ github.event.pull_request.head.sha }}
           LATEST_TAG="${{ steps.get_latest_tag.outputs.tag }}"
 
+          # Construct the message body without including the tag directly
           COMMENT_BODY=$(cat <<EOF
-          $COMMENT_IDENTIFIER
-
           ### Installation Instructions (Preview)
 
           You can install the version from this Pull Request (#$PR_NUMBER) using pip:
@@ -52,17 +51,17 @@ jobs:
           *Note: This comment is automatically updated on new commits.*
           EOF
           )
-          # Escape special characters for JSON compatibility if needed (though typically handled by the action)
           # Make the comment body available as a multiline output
           echo "body<<EOF" >> "$GITHUB_OUTPUT"
           echo "$COMMENT_BODY" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
-          echo "identifier=$COMMENT_IDENTIFIER" >> "$GITHUB_OUTPUT"
+          # Output the simple tag for the next step
+          echo "tag=$COMMENT_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Post or Update PR Comment
         uses: thollander/actions-comment-pull-request@v3
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: ${{ steps.comment_body.outputs.body }}
-          comment-tag: ${{ steps.comment_body.outputs.identifier }}
-          pr_number: ${{ github.event.number }}
+          comment-tag: ${{ steps.comment_body.outputs.tag }} # Use the simple string tag
+          pr_number: ${{ github.event.number }} # Explicitly pass PR number
