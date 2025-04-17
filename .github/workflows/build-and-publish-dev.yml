@@ -2,8 +2,8 @@ name: Build and publish
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
   build:
@@ -23,15 +23,16 @@ jobs:
         id: build
         uses: ./.github/actions/build
 
-  publish-pypi:
-    name: Publish to PyPI
+  publish-testpypi:
+    name: Publish to TestPyPI
     needs: build
     permissions:
       id-token: write
 
     uses: ./.github/workflows/publish.yml
     with:
-      environment-name: pypi
-      environment-url: https://pypi.org/p/unchained
+      environment-name: testpypi
+      environment-url: https://test.pypi.org/p/unchained
       version: ${{ needs.build.outputs.version }}
     secrets: inherit
+
