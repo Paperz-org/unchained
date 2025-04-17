@@ -1,10 +1,11 @@
 from typing import Generic, TypeVar, cast, get_origin
 
-from ninja.errors import ValidationError
 from pydantic import BaseModel
 
-from unchained.request import Request
 from unchained.dependencies.custom import BaseCustom
+from unchained.ninja.errors import ValidationError
+from unchained.request import Request
+
 T = TypeVar("T")
 
 

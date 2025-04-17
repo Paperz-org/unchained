@@ -1,11 +1,7 @@
-import json
 from pathlib import Path
-from typing import Any
 
-from django.http import HttpRequest, HttpResponse
 
-from unchained.ninja import NinjaAPI
-from unchained.ninja.openapi.docs import Swagger, _csrf_needed, render_template
+from unchained.ninja.openapi.docs import Swagger
 
 template_path = Path(__file__).parent.parent / "templates/swagger.html"
 

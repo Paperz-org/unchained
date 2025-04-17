@@ -1,4 +1,4 @@
-from typing import Annotated, Generic, TypeVar, cast
+from typing import Generic, TypeVar, cast
 
 from pydantic import BaseModel
 
