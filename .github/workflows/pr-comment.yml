@@ -63,5 +63,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: ${{ steps.comment_body.outputs.body }}
-          comment-tag: ${{ steps.comment_body.outputs.tag }} # Use the simple string tag
+          comment-tag: "pull_request_status"
           pr_number: ${{ github.event.number }} # Explicitly pass PR number
