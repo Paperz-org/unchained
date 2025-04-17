@@ -64,5 +64,5 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           message: ${{ steps.comment_body.outputs.body }}
-          comment_identifier: ${{ steps.comment_body.outputs.identifier }}
+          comment-tag: ${{ steps.comment_body.outputs.identifier }}
           pr_number: ${{ github.event.number }}
