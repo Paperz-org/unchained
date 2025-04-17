@@ -1,0 +1,18 @@
+name: Hello World Manual Trigger
+
+on:
+  # Allows running this workflow manually from the Actions tab or via API
+  workflow_dispatch:
+
+jobs:
+  say_hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say Hello
+        run: echo "👋 Hello World! This was triggered manually."
+
+      # Future step: Could add steps here to update the original PR comment
+      # This would require passing the PR number and comment identifier (header)
+      # as inputs to workflow_dispatch and using the GitHub API or another action.
+      # - name: Update PR Comment (Placeholder)
+      #   run: echo "Updating PR comment status... (Not implemented yet)" 
