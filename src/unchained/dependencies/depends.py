@@ -1,7 +1,8 @@
 from typing import Any, Callable, get_args
-from fast_depends.dependencies import model
-from unchained.signature import Signature
 
+from fast_depends.dependencies import model
+
+from unchained.signature import Signature
 from unchained.signature.transformers import create_signature_with_auto_dependencies
 
 
@@ -13,6 +14,7 @@ class Depends(model.Depends):
         use_cache: bool = True,
         cast: bool = True,
     ) -> None:
+        self._signature_meta_data: dict[str, Any] = {}
         super().__init__(dependency, use_cache=use_cache, cast=cast)
         self._update_dependency_signature()
 
@@ -23,9 +25,9 @@ class Depends(model.Depends):
             if param.is_custom_depends:
                 type_, instance = get_args(param.annotation)
                 # Add the type to the CustomField
-                setattr(instance, "param_name", param.name)
+                setattr(instance, "signature_param_name", param.name)
                 setattr(instance, "annotation_type", type_)
                 setattr(instance, "default", param.default)
-
+                self._signature_meta_data[param.name] = instance
         # This transform the signature of the dependency to add the auto dependencies (request, settings, app, state)
         self.dependency.__signature__ = create_signature_with_auto_dependencies(signature)

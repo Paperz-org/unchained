@@ -2,8 +2,8 @@ import inspect
 from typing import Annotated, get_args, get_origin
 
 from django.http import HttpRequest
-from unchained.base import BaseUnchained
 
+from unchained.base import BaseUnchained
 from unchained.settings.base import UnchainedSettings
 from unchained.states import BaseState
 
@@ -41,16 +41,16 @@ class Parameter(inspect.Parameter):
 
     @property
     def is_header(self) -> bool:
-        from unchained.dependencies.header import Header
+        from unchained.dependencies import Header
 
         if self.is_annotated:
             _, instance = get_args(self.annotation)
             return isinstance(instance, Header)
         return issubclass(self.annotation, Header)
-    
+
     @property
     def is_query_params(self) -> bool:
-        from unchained.dependencies.query_params import QueryParams
+        from unchained.dependencies import QueryParams
 
         if self.is_annotated:
             _, instance = get_args(self.annotation)
@@ -67,7 +67,7 @@ class Parameter(inspect.Parameter):
     @property
     def is_depends(self) -> bool:
         """Check if the parameter is a depends parameter."""
-        from unchained.dependencies.depends import Depends
+        from unchained.dependencies import Depends
 
         if self.is_annotated:
             _, instance = get_args(self.annotation)
@@ -82,7 +82,7 @@ class Parameter(inspect.Parameter):
     @property
     def is_custom_depends(self) -> bool:
         """Check if the parameter is a custom depends parameter."""
-        from unchained.dependencies.custom import BaseCustom
+        from unchained.dependencies import BaseCustom
 
         if self.is_annotated:
             _, instance = get_args(self.annotation)

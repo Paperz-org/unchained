@@ -11,3 +11,4 @@ class BaseModel(models.Model, metaclass=MainAppModelMeta):
 
     class Meta:
         abstract = True
+

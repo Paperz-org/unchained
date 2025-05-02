@@ -1,16 +1,20 @@
-from unchained import context
+import asyncio
+import copy
+import functools
+from contextlib import asynccontextmanager, contextmanager
 from typing import Callable, get_args
 
 from fast_depends import inject
 
-from unchained.dependencies.custom import BaseCustom
-from unchained.request import Request
+from unchained import context
+from unchained.dependencies import BaseCustom
+from unchained.ninja.params import Query
+from unchained.requests import Request
 from unchained.signature import Signature
-import functools
-import copy
-import asyncio
-
-from unchained.signature.transformers import create_signature_with_auto_dependencies, create_signature_without_annotated
+from unchained.signature.transformers import (
+    create_signature_with_auto_dependencies,
+    create_signature_without_annotated,
+)
 
 
 class UnchainedBaseMeta(type):
@@ -24,21 +28,35 @@ class UnchainedBaseMeta(type):
                     def wrapper(api_func):
                         if hasattr(api_func, "_original_api_func"):
                             api_func = api_func._original_api_func
-
                         # Get the signature of the API function
                         signature = Signature.from_callable(api_func)
                         # TODO msut work but ????????????????????????????????????
                         # _original_signature = Signature.from_callable(api_func)
                         _original_signature = copy.deepcopy(signature)
 
+                        ninja_contribute_args = []
+
                         for param_name, param in signature.parameters.items():
                             if param.is_custom_depends:
                                 type_, instance = get_args(param.annotation)
                                 if isinstance(instance, BaseCustom):
-                                    setattr(instance, "param_name", param_name)
+                                    setattr(instance, "signature_param_name", param_name)
                                     setattr(instance, "annotation_type", type_)
                                     setattr(instance, "default", param.default)
 
+                            # TODO: refacto
+                            if param.is_depends:
+                                type_, instance = get_args(param.annotation)
+                                for dependency_name, dependency in instance._signature_meta_data.items():
+                                    ninja_contribute_args.append(
+                                        (
+                                            dependency_name,
+                                            type_,
+                                            dependency._ninja_equivalent(...),
+                                        )
+                                    )
+
+                        api_func._ninja_contribute_args = ninja_contribute_args
                         signature_with_auto_dependencies = create_signature_with_auto_dependencies(signature)
 
                         api_func.__signature__ = signature_with_auto_dependencies
@@ -80,8 +98,8 @@ class UnchainedBaseMeta(type):
                         async def adecorated(*func_args, **func_kwargs):
                             func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
                             # This is the API result:
-                            res = await injected(*func_args, **func_kwargs)
-                            return res
+                            # return await injected(*func_args, **func_kwargs)
+                            return await injected(*func_args, **func_kwargs)
 
                         result = http_method(*decorator_args, **decorator_kwargs)(
                             adecorated if asyncio.iscoroutinefunction(api_func) else decorated
