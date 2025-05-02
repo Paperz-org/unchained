@@ -40,15 +40,18 @@ async def route_async_body_pydantic(item: Annotated[Item, Body()]):
     return item.model_dump()
 
 
-# --- Test Helpers ---
+# --- Test Parametrization ---
 
-PARAMETRIZE_CLIENT = pytest.mark.parametrize(
-    "route_suffix, client_fixture_name, is_async",
+PARAMETRIZE_PYDANTIC = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
     [
-        ("sync", "test_client", False),
-        ("async", "async_test_client", True),
+        ("sync", route_sync_body_pydantic, "test_client", False),
+        ("async", route_async_body_pydantic, "async_test_client", True),
     ],
 )
+
+
+# --- Test Helpers ---
 
 
 async def make_request(test_client, route_path: str, is_async: bool, json_data: dict) -> HTTPResponse:
@@ -62,20 +65,20 @@ async def make_request(test_client, route_path: str, is_async: bool, json_data: 
 
 
 @pytest.mark.skip(reason="Body dependency not yet supported")
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_PYDANTIC
 @pytest.mark.asyncio
 async def test_body_pydantic_valid(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_body_pydantic if not is_async else route_async_body_pydantic
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/items-valid-{route_suffix}/"
     item_data = {"name": "Test Item", "price": 19.99}
-    app.post(route_path)(route)
+    app.post(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async, json_data=item_data)
 
@@ -87,20 +90,20 @@ async def test_body_pydantic_valid(
 
 
 @pytest.mark.skip(reason="Body dependency not yet supported")
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_PYDANTIC
 @pytest.mark.asyncio
 async def test_body_pydantic_valid_with_optional(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_body_pydantic if not is_async else route_async_body_pydantic
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/items-optional-{route_suffix}/"
     item_data = {"name": "Test Item", "price": 19.99, "is_offer": True}
-    app.post(route_path)(route)
+    app.post(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async, json_data=item_data)
 
@@ -112,20 +115,20 @@ async def test_body_pydantic_valid_with_optional(
 
 
 @pytest.mark.skip(reason="Body dependency not yet supported")
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_PYDANTIC
 @pytest.mark.asyncio
 async def test_body_pydantic_invalid_missing_field(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_body_pydantic if not is_async else route_async_body_pydantic
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/items-missing-{route_suffix}/"
     item_data = {"price": 19.99}  # Missing 'name'
-    app.post(route_path)(route)
+    app.post(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async, json_data=item_data)
     data = json.loads(response.content.decode())
@@ -149,20 +152,20 @@ async def test_body_pydantic_invalid_missing_field(
 
 
 @pytest.mark.skip(reason="Body dependency not yet supported")
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_PYDANTIC
 @pytest.mark.asyncio
 async def test_body_pydantic_invalid_wrong_type(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_body_pydantic if not is_async else route_async_body_pydantic
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/items-type-error-{route_suffix}/"
     item_data = {"name": "Test Item", "price": "nineteen-ninety-nine"}  # Wrong type for price
-    app.post(route_path)(route)
+    app.post(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async, json_data=item_data)
     data = json.loads(response.content.decode())

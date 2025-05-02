@@ -1,3 +1,5 @@
+from pydantic import ValidationError as PydanticValidationError
+
 from unchained.ninja.errors import HttpError as NinjaHTTPError
 from unchained.ninja.errors import ValidationError as NinjaValidationError
 

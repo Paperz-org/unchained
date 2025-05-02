@@ -41,15 +41,26 @@ async def route_async_uses_dep_with_request(data: Annotated[dict, Depends(dep_as
     return data
 
 
-# --- Test Helpers ---
+# --- Test Parametrizations ---
 
-PARAMETRIZE_CLIENT = pytest.mark.parametrize(
-    "route_suffix, client_fixture_name, is_async",
+PARAMETRIZE_DIRECT = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
     [
-        ("sync", "test_client", False),
-        ("async", "async_test_client", True),
+        ("sync", route_sync_request_direct, "test_client", False),
+        ("async", route_async_request_direct, "async_test_client", True),
     ],
 )
+
+PARAMETRIZE_IN_DEP = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
+    [
+        ("sync", route_sync_uses_dep_with_request, "test_client", False),
+        ("async", route_async_uses_dep_with_request, "async_test_client", True),
+    ],
+)
+
+
+# --- Test Helpers ---
 
 
 async def make_request(test_client, route_path: str, is_async: bool) -> HTTPResponse:
@@ -62,19 +73,19 @@ async def make_request(test_client, route_path: str, is_async: bool) -> HTTPResp
 # --- Test Cases ---
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_DIRECT
 @pytest.mark.asyncio
 async def test_request_injected_directly(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_request_direct if not is_async else route_async_request_direct
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/direct-request-{route_suffix}"
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 
@@ -85,19 +96,19 @@ async def test_request_injected_directly(
     assert response.json() == expected_json, f"Route {route_path}: Expected {expected_json}, got {response.json()}"
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_IN_DEP
 @pytest.mark.asyncio
 async def test_request_injected_into_dependency(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_uses_dep_with_request if not is_async else route_async_uses_dep_with_request
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/dep-request-{route_suffix}"
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 

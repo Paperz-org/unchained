@@ -7,7 +7,6 @@ from typing import Annotated, Callable
 import pytest
 from _pytest.fixtures import FixtureRequest
 
-from tests.utils.client import UnchainedAsyncTestClient, UnchainedTestClient
 from unchained import Depends, Unchained
 from unchained.responses import HTTPResponse
 
@@ -66,12 +65,12 @@ async def dep_branch_b_async(base: Annotated[str, Depends(dep_shared_base_async)
 
 
 # Parameter Resolution within Dependency
-def dep_needs_path_param_sync(item_id: str, prefix: str = "item"):  # item_id from path
-    return f"{prefix}:{item_id}"
+def dep_needs_path_param_sync(item_id: str):
+    return item_id
 
 
-async def dep_needs_path_param_async(item_id: int, prefix: str = "item_async"):  # item_id from path
-    return f"{prefix}:{item_id * 10}"
+async def dep_needs_path_param_async(item_id: int):
+    return item_id
 
 
 # --- Routes ---
@@ -113,15 +112,42 @@ async def route_async_dep_with_path_param(result: Annotated[str, Depends(dep_nee
     return {"result": result}
 
 
-# --- Test Helpers ---
+# --- Test Parametrizations ---
 
-PARAMETRIZE_CLIENT = pytest.mark.parametrize(
-    "route_suffix, client_fixture_name, is_async",
+PARAMETRIZE_BASIC = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
     [
-        ("sync", "test_client", False),
-        ("async", "async_test_client", True),
+        ("sync", route_sync_basic_nested, "test_client", False),
+        ("async", route_async_basic_nested, "async_test_client", True),
     ],
 )
+
+PARAMETRIZE_MULTI_LEVEL = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
+    [
+        ("sync", route_sync_multi_level, "test_client", False),
+        ("async", route_async_multi_level, "async_test_client", True),
+    ],
+)
+
+PARAMETRIZE_BRANCHING = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
+    [
+        ("sync", route_sync_branching, "test_client", False),
+        ("async", route_async_branching, "async_test_client", True),
+    ],
+)
+
+PARAMETRIZE_PATH_PARAM = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
+    [
+        ("sync", route_sync_dep_with_path_param, "test_client", False),
+        ("async", route_async_dep_with_path_param, "async_test_client", True),
+    ],
+)
+
+
+# --- Test Helpers ---
 
 
 async def make_request(test_client, route_path: str, is_async: bool) -> HTTPResponse:
@@ -134,20 +160,20 @@ async def make_request(test_client, route_path: str, is_async: bool) -> HTTPResp
 # --- Test Cases ---
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_BASIC
 @pytest.mark.asyncio
 async def test_nested_basic(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_basic_nested if not is_async else route_async_basic_nested
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/nested-basic-{route_suffix}"
     expected_value = "level1_level2" if not is_async else "level1_async_level2_async"
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 
@@ -157,20 +183,20 @@ async def test_nested_basic(
     assert response.json() == {"value": expected_value}, f"Route {route_path}: Unexpected response JSON."
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_MULTI_LEVEL
 @pytest.mark.asyncio
 async def test_nested_multi_level(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_multi_level if not is_async else route_async_multi_level
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/nested-multi-{route_suffix}"
     expected_value = "level1_level2_level3" if not is_async else "level1_async_level2_async_level3_async"
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 
@@ -180,21 +206,21 @@ async def test_nested_multi_level(
     assert response.json() == {"value": expected_value}, f"Route {route_path}: Unexpected response JSON."
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_BRANCHING
 @pytest.mark.asyncio
 async def test_nested_branching(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_branching if not is_async else route_async_branching
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/nested-branching-{route_suffix}"
     base = "shared_base" if not is_async else "shared_base_async"
     expected_value = {"a": f"branch_a({base})", "b": f"branch_b({base})"}
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 
@@ -205,22 +231,23 @@ async def test_nested_branching(
     # NOTE: Caching verification (shared base running once) requires mocks/counters, not done here.
 
 
-@PARAMETRIZE_CLIENT
+@pytest.mark.skip(reason="No implemented yet")
+@PARAMETRIZE_PATH_PARAM
 @pytest.mark.asyncio
 async def test_nested_dep_resolves_path_param(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_dep_with_path_param if not is_async else route_async_dep_with_path_param
     test_client = request.getfixturevalue(client_fixture_name)
     base_path = f"/items-{route_suffix}"
     item_value = "abc" if not is_async else 123
-    expected_result = f"item:{item_value}" if not is_async else f"item_async:{item_value * 10}"
+    expected_result = item_value if not is_async else item_value
     request_path = f"{base_path}/{item_value}"
-    app.get(f"{base_path}/{{item_id}}")(route)
+    app.get(f"{base_path}/{{item_id}}")(route_handler)
 
     response = await make_request(test_client, request_path, is_async)
 

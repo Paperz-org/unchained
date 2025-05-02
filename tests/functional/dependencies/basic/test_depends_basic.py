@@ -83,15 +83,34 @@ async def route_async_dataclass_dep(val: Annotated[DepDataclass, Depends(async_d
     return val
 
 
-# --- Test Helpers ---
+# --- Test Parametrizations ---
 
-PARAMETRIZE_CLIENT = pytest.mark.parametrize(
-    "route_suffix, client_fixture_name, is_async",
+PARAMETRIZE_BASIC = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
     [
-        ("sync", "test_client", False),
-        ("async", "async_test_client", True),
+        ("sync", route_sync_basic_dep, "test_client", False),
+        ("async", route_async_basic_dep, "async_test_client", True),
     ],
 )
+
+PARAMETRIZE_NONE = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
+    [
+        ("sync", route_sync_none_dep, "test_client", False),
+        ("async", route_async_none_dep, "async_test_client", True),
+    ],
+)
+
+PARAMETRIZE_DATACLASS = pytest.mark.parametrize(
+    "route_suffix, route_handler, client_fixture_name, is_async",
+    [
+        ("sync", route_sync_dataclass_dep, "test_client", False),
+        ("async", route_async_dataclass_dep, "async_test_client", True),
+    ],
+)
+
+
+# --- Test Helpers ---
 
 
 async def make_request(test_client, route_path: str, is_async: bool) -> HTTPResponse:
@@ -104,20 +123,20 @@ async def make_request(test_client, route_path: str, is_async: bool) -> HTTPResp
 # --- Test Cases ---
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_BASIC
 @pytest.mark.asyncio
 async def test_depends_basic(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_basic_dep if not is_async else route_async_basic_dep
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/basic-{route_suffix}"
     expected_value = SYNC_DEP_VALUE if not is_async else ASYNC_DEP_VALUE
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 
@@ -127,19 +146,19 @@ async def test_depends_basic(
     assert response.json() == {"value": expected_value}, f"Route {route_path}: Unexpected response JSON."
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_NONE
 @pytest.mark.asyncio
 async def test_depends_none(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_none_dep if not is_async else route_async_none_dep
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/none-{route_suffix}"
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 
@@ -149,21 +168,21 @@ async def test_depends_none(
     assert response.json() == {"value": None}, f"Route {route_path}: Expected value to be None."
 
 
-@PARAMETRIZE_CLIENT
+@PARAMETRIZE_DATACLASS
 @pytest.mark.asyncio
 @pytest.mark.skip(reason="Not supported yet")
 async def test_depends_dataclass(
     app: Unchained,
     request: FixtureRequest,
     route_suffix: str,
+    route_handler: Callable,
     client_fixture_name: str,
     is_async: bool,
 ):
-    route = route_sync_dataclass_dep if not is_async else route_async_dataclass_dep
     test_client = request.getfixturevalue(client_fixture_name)
     route_path = f"/dataclass-{route_suffix}"
     expected_dataclass = SYNC_DATACLASS_INSTANCE if not is_async else ASYNC_DATACLASS_INSTANCE
-    app.get(route_path)(route)
+    app.get(route_path)(route_handler)
 
     response = await make_request(test_client, route_path, is_async)
 
