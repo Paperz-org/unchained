@@ -7,6 +7,7 @@ from fast_depends import inject
 
 from unchained import context
 from unchained.dependencies.custom import BaseCustom
+from unchained.request import Request
 from unchained.signature import Signature
 from unchained.signature.transformers import (
     create_signature_with_auto_dependencies,
@@ -38,6 +39,7 @@ class UnchainedBaseMeta(type):
                                 if isinstance(instance, BaseCustom):
                                     setattr(instance, "param_name", param_name)
                                     setattr(instance, "annotation_type", type_)
+                                    setattr(instance, "default", param.default)
 
                         signature_with_auto_dependencies = create_signature_with_auto_dependencies(signature)
 
@@ -54,6 +56,13 @@ class UnchainedBaseMeta(type):
 
                             # Get the request parameter
                             request = func_args[0]
+
+                            # This is a trick to override the class of the request ... After the instanciation
+                            # `request` is an ASGIRequest instance from Django.
+                            # `Request` is our custom class, that inherit from ASGIRequest.
+                            # With this trick, we are changing the type of the instance
+                            # It like ... inheritence in the future ¯\_(ツ)_/¯
+                            request.__class__ = Request
 
                             # Set the context request in ContextVar
                             context.request.set(request)

@@ -1,6 +1,8 @@
 ![Unchained](assets/logo.png)
 
+
 # Unchained - Modern Single-File Django Framework
+[![PyPI version](https://badge.fury.io/py/unchained.svg)](https://badge.fury.io/py/unchained)
 
 Unchained is a framework that lets you build complete Django applications in a **single file**, without the traditional project and app structure. Write modern Python web apps with minimal boilerplate.
 

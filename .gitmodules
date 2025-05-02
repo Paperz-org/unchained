@@ -1,3 +1,0 @@
-[submodule "src/django-ninja"]
-	path = src/django-ninja
-	url = https://github.com/mde-pach/django-ninja.git

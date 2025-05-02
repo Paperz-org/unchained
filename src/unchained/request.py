@@ -1,3 +1,5 @@
-from django.http import HttpRequest as DjangoHttpRequest
+from django.core.handlers.asgi import ASGIRequest
 
-Request = DjangoHttpRequest
+class Request(ASGIRequest):
+    def query_params(self):
+        return self.GET

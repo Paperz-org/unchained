@@ -1,7 +1,7 @@
 [project]
 name = "unchained"
-version = "0.1.5"
-description = "Modern, high-performance Python web framework based on Django."
+dynamic = ["version"]
+description = "Modern, developer-friendly and velocity oriented Python web framework based on Django."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -23,12 +23,12 @@ authors = [
 unchained = "unchained.cli:main"
 
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src", "src/django-ninja"]
-include = ["unchained*", "ninja*"]
+where = ["src"]
+include = ["unchained*"]
 
 [tool.setuptools.package-data]
 ninja = ["templates/**/*"]
@@ -57,7 +57,20 @@ doc = [
 ]
 
 [tool.mypy]
-files = ["src/"]
+files = ["src/unchained"]
+exclude = [
+    "src/unchained/ninja",
+    "src/unchained/ninja_crud",
+]
 
 [tool.ruff]
 line-length = 120
+exclude = [
+    "src/unchained/ninja",
+    "src/unchained/ninja_crud",
+]
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
+

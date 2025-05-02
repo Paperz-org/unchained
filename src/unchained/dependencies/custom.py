@@ -1,8 +1,9 @@
 from functools import partial
 from typing import Generic, TypeVar
 
-from unchained.dependencies.depends import Depends
 from unchained.signature.signature import Signature
+
+from .depends import Depends
 
 T = TypeVar("T")
 
@@ -21,4 +22,4 @@ class BaseCustom(Depends, Generic[T]):
         super().__init__(dependency, use_cache=use_cache, cast=cast)
         self.param_name: str | None = None
         self.annotation_type: type[T]
-        self.default: T | None = None
+        self.default: type[T]

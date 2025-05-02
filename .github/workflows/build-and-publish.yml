@@ -1,0 +1,40 @@
+name: Build and publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build
+        id: build
+        uses: ./.github/actions/build
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: build
+    permissions:
+      id-token: write
+
+    uses: ./.github/workflows/publish.yml
+    with:
+      environment-name: pypi
+      environment-url: https://pypi.org/p/unchained
+      version: ${{ needs.build.outputs.version }}
+    secrets: inherit

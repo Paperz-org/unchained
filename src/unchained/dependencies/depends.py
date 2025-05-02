@@ -27,7 +27,6 @@ class Depends(model.Depends):
                 setattr(instance, "param_name", param.name)
                 setattr(instance, "annotation_type", type_)
                 setattr(instance, "default", param.default)
-                # if param.default:
 
         # This transform the signature of the dependency to add the auto dependencies (request, settings, app, state)
         self.dependency.__signature__ = create_signature_with_auto_dependencies(signature)

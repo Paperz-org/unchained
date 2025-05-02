@@ -1,0 +1,10 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  lint:
+    permissions:
+      id-token: write
+    uses: ./.github/workflows/lint.yml

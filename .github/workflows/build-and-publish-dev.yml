@@ -1,0 +1,43 @@
+name: Build and publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    outputs:
+      version: ${{ steps.build.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Build
+        id: build
+        uses: ./.github/actions/build
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    permissions:
+      id-token: write
+
+    uses: ./.github/workflows/publish.yml
+    with:
+      environment-name: testpypi
+      environment-url: https://test.pypi.org/p/unchained
+      version: ${{ needs.build.outputs.version }}
+    secrets: inherit
+
