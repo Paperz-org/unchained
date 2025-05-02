@@ -1,8 +1,6 @@
-from unchained.dependencies.depends import Depends
-
 from . import models
+from .dependencies import Depends
+from .requests import Request
 from .unchained import Unchained
-from .request import Request
-
 
 __all__ = ["Unchained", "models", "Depends", "Request"]

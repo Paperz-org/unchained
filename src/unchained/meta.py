@@ -6,8 +6,8 @@ from typing import Callable, get_args
 from fast_depends import inject
 
 from unchained import context
-from unchained.dependencies.custom import BaseCustom
-from unchained.request import Request
+from unchained.dependencies import BaseCustom
+from unchained.requests import Request
 from unchained.signature import Signature
 from unchained.signature.transformers import (
     create_signature_with_auto_dependencies,

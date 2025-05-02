@@ -2,20 +2,20 @@ from typing import Generic, TypeVar, cast, get_origin
 
 from pydantic import BaseModel
 
-from unchained.dependencies.custom import BaseCustom
+from unchained.dependencies import BaseCustom
 from unchained.ninja.errors import ValidationError
-from unchained.request import Request
+from unchained.requests import Request
 
 T = TypeVar("T")
-
 
 
 class QueryParams(BaseCustom, Generic[T]):
     ITERABLES = (list, tuple, set)
 
-    def __init__(self, param_name: str | None = None, required: bool = True):
+    def __init__(self, param_name: str | None = None, required: bool = True, default: T | None = None):
         super().__init__()
         self.param_name = param_name
+        self._default = default
         self.required = required
         self.annotation_type: type[T]
         self.default: type[T]
@@ -36,25 +36,28 @@ class QueryParams(BaseCustom, Generic[T]):
         if self.default is not None:
             return self.default
 
+        default = self._default or self.default
+        if default is not None:
+            return default
+
         if self.required:
             raise ValidationError([{"msg": f"Missing query parameter: {self.param_name}"}])
 
         return None
-    
+
     def _get_model_values(self, query_params: dict[str, str]) -> dict[str, str | list[str]]:
         model_values = {}
-    
+
         for field_name, field in self.annotation_type.model_fields.items():
-            
             if field_name not in query_params:
                 continue
-            
+
             origin = get_origin(field.annotation)
 
             if origin in self.ITERABLES:
                 model_values[field_name] = query_params.getlist(field_name)
                 continue
-            
+
             try:
                 if issubclass(origin, self.ITERABLES):
                     model_values[field_name] = query_params.getlist(field_name)
@@ -64,6 +67,5 @@ class QueryParams(BaseCustom, Generic[T]):
                 model_values[field_name] = query_params.get(field_name)
             finally:
                 continue
-            
 
         return model_values

@@ -1,4 +1,5 @@
-from ninja.errors import ValidationError as NinjaValidationError
+from unchained.ninja.errors import HttpError as NinjaHTTPError
+from unchained.ninja.errors import ValidationError as NinjaValidationError
 
 
 class UnchainedBaseException(Exception):
@@ -10,4 +11,8 @@ class UnchainedError(UnchainedBaseException):
 
 
 class ValidationError(UnchainedBaseException, NinjaValidationError):
+    pass
+
+
+class HTTPError(UnchainedBaseException, NinjaHTTPError):
     pass
