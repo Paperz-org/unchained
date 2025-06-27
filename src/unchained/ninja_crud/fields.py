@@ -9,10 +9,7 @@ from pydantic import IPvAnyAddress
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined, core_schema
 
-from unchained.ninja.errors import ConfigError
-from unchained.ninja.openapi.schema import OpenAPISchema
-from unchained.ninja.types import DictStrAny
-
+from unchained.ninja_crud.schema import DictStrAny
 __all__ = ["create_m2m_link_type", "get_schema_field", "get_related_field_schema"]
 
 
@@ -158,7 +155,7 @@ def get_schema_field(
         except KeyError as e:
             msg = [
                 f"Do not know how to convert django field '{internal_type}'.",
-                "Try from unchained.ninja.orm import register_field",
+                "Try from unchained.ninja_crud.fieds import register_field",
                 f"register_field('{internal_type}', <your-python-type>)",
             ]
             raise ConfigError("\n".join(msg)) from e
@@ -198,8 +195,8 @@ def get_schema_field(
 
 
 @no_type_check
-def get_related_field_schema(field: DjangoField, *, depth: int) -> Tuple[OpenAPISchema]:
-    from unchained.ninja.orm import create_schema
+def get_related_field_schema(field: DjangoField, *, depth: int):
+    from unchained.ninja_crud.factory import create_schema
 
     model = field.related_model
     schema = create_schema(model, depth=depth - 1)

@@ -5,8 +5,7 @@ from typing import Callable, cast
 from django.db.models import QuerySet
 from unchained.requests import Request
 
-from unchained.ninja import Query
-from unchained.ninja.pagination import paginate
+from unchained.dependencies import QueryParams
 
 from ..decorators import rename_parameter as rename
 from ..exceptions import BadRequest, EntryNotFound
@@ -20,7 +19,7 @@ from ..types import (
 )
 from .base import BaseViewSet
 
-ListItemsReturnType = Callable[[Request, Query], QuerySet[ModelType]]
+ListItemsReturnType = Callable[[Request, QueryParams], QuerySet[ModelType]]
 GetItemReturnType = Callable[[Request, PKType], ModelType]
 CreateItemReturnType = Callable[[Request, CreateSchemaType], ModelType]
 UpdateItemReturnType = Callable[[Request, PKType, UpdateSchemaType], ModelType]
@@ -80,7 +79,7 @@ class SyncViewSet(BaseViewSet[ModelType, CreateSchemaType, ReadSchemaType, Updat
         """List items."""
 
         @paginate
-        def _list_items(filters: self.filter_schema = Query(...)) -> QuerySet[ModelType]:  # noqa: B008
+        def _list_items(filters: self.filter_schema = QueryParams(...)) -> QuerySet[ModelType]:  # noqa: B008
             """List items."""
             return cast(QuerySet[ModelType], filters.filter(self.queryset))
 

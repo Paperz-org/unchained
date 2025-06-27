@@ -9,7 +9,7 @@ from django.urls import path
 from unchained import context
 from unchained.admin import UnchainedAdmin
 from unchained.base import BaseUnchained
-from unchained.docs.swagger import UnchainedSwagger
+#from unchained.docs.swagger import UnchainedSwagger
 from unchained.lifespan import Lifespan
 from unchained.meta import UnchainedMeta, URLPatterns
 from unchained.settings.base import UnchainedSettings
@@ -40,7 +40,9 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
         self.state = state or BaseState()
 
         self._lifespan = self._wrap_lifespan(lifespan) if lifespan else None
-        super().__init__(**kwargs, docs=UnchainedSwagger(), title=title)
+        # TODO: Fix swagger
+        # TODO: fix base_url
+        super().__init__(**kwargs, title=title)
         context.app.set(self)
 
     def lifespan(self, func: Callable):

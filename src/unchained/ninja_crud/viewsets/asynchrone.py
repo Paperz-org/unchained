@@ -9,7 +9,6 @@ from unchained.requests import Request
 from pydantic import ValidationError
 
 from unchained.dependencies import QueryParams
-# from unchained.ninja.pagination import paginate
 
 from ..decorators import async_rename_parameter as rename
 from ..exceptions import BadRequest, EntryNotFound
