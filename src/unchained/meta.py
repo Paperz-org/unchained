@@ -47,14 +47,24 @@ class UnchainedBaseMeta(type):
                             # TODO: refacto
                             if param.is_depends:
                                 type_, instance = get_args(param.annotation)
-                                for dependency_name, dependency in instance._signature_meta_data.items():
+                                if hasattr(instance, "_ninja_equivalent"):
                                     ninja_contribute_args.append(
                                         (
-                                            dependency_name,
-                                            type_,
-                                            dependency._ninja_equivalent(...),
+                                            param_name,
+                                        type_,
+                                        instance._ninja_equivalent(...),
                                         )
                                     )
+
+                                for dependency_name, dependency in instance._signature_meta_data.items():
+                                    if hasattr(dependency, "_ninja_equivalent"):
+                                        ninja_contribute_args.append(
+                                            (
+                                                dependency_name,
+                                                type_,
+                                                dependency._ninja_equivalent(...),
+                                            )
+                                        )
 
                         api_func._ninja_contribute_args = ninja_contribute_args
                         signature_with_auto_dependencies = create_signature_with_auto_dependencies(signature)

@@ -1,7 +1,5 @@
 # Request Object
 
-Unchained automatically injects the `Request` object if you type-hint it in your route handler or dependency function signature. This object provides access to the raw request details.
-
 ```python
 from unchained import Unchained, Request
 

@@ -1,143 +1,166 @@
+---
+title: Dependency Injection Introduction
+---
+
 # Dependency Injection
 
-!!! abstract "Overview"
-    Unchained leverages Python's `typing.Annotated` and a powerful dependency injection system based on `FastDepends` to manage dependencies in your API endpoints. This allows for clean, reusable, and testable code.
-    ```python
-    from typing import Annotated
-    from unchained import Depends, Unchained, Request
-    
-    app = Unchained()
-    
-    @app.get("/hello")
-    def hello(
-        request: Request,
-        message: Annotated[str, Depends(get_common_message)]
-    ):
-        return {"message": f"Hello {message}!"}
-    ```
+Unchained provides a powerful and flexible Dependency Injection (DI) system inspired by FastAPI. It allows you to structure your code with reusable components, manage resources effectively, and automatically inject parameters like request data into your route handlers and dependencies.
 
-## Basic Usage
+This page covers the core concepts. For specific injection methods, see the dedicated pages.
 
-At its core, dependency injection in Unchained uses `Annotated` to pair a type hint with a `Depends` marker, indicating that the parameter's value should be provided by a _dependency function_ (also called a _dependable_ or _dependency_).
+## Core Concepts
+
+### 1. `Depends` Marker
+
+The core of the DI system is the `Depends` marker used in conjunction with `typing.Annotated`. You annotate your function parameters with the type of the dependency and mark it with `Depends(your_dependency_callable)`.
 
 ```python
 from typing import Annotated
-from unchained import Depends, Unchained, Request
+from unchained import Depends, Unchained
+
+# Define a simple dependency (a callable)
+def get_common_data() -> dict:
+    return {"message": "Hello from dependency!"}
+
+# Inject the dependency into a route handler
+def read_items(common: Annotated[dict, Depends(get_common_data)]):
+    # 'common' now holds the dictionary returned by get_common_data
+    return {"data": common}
 
 app = Unchained()
-
-# This is a dependency function
-def get_message() -> str:
-    return "world"
-
-@app.get("/hello")
-def hello(
-    request: Request,
-    message: Annotated[str, Depends(get_message)]
-):
-    return {"message": f"Hello {message}!"}
+app.get("/items/")(read_items)
 ```
 
-!!! tip "How it works"
-    When a request hits `/hello`, Unchained automatically:
+When a request comes to `/items/`, Unchained will:
+1. See the `common` parameter annotated with `Depends(get_common_data)`.
+2. Call the `get_common_data` function.
+3. Pass the returned value (`{"message": "Hello from dependency!"}`) as the `common` argument to `read_items`.
 
-    1. Injects the `Request` object.
-    2. Calls the `get_common_message()` function.
-    3. Injects the return value (`"world"`) as the `message` argument.
-    4. Calls your route handler `hello` with all the resolved arguments.
+### 2. Sync and Async Support
 
+The DI system seamlessly handles both synchronous (`def`) and asynchronous (`async def`) functions for both route handlers and dependencies.
 
-!!! danger "Bad patterns"
-    Dependency injection system must be seen as syntactic sugar for avoiding complexity in your code base.
-    
-    If you are doing something that you think is not possible unless you use the dependency injection system, it might be a sign that you are doing something wrong.
+-   **Async Routes**: Can depend on both `sync` and `async` dependencies. Unchained runs `sync` dependencies in a thread pool to avoid blocking the event loop.
+-   **Sync Routes**: Can **only** depend on `sync` dependencies. Trying to use an `async` dependency in a `sync` route will result in an error.
 
-    Dependency injection is just a way to make your code more readable and maintainable and reusable.
+```python
+# Async dependency
+async def get_async_value() -> str:
+    # Imagine an async operation here
+    return "async_value"
 
-    
-## Nested Dependencies
+# Sync dependency
+def get_sync_value() -> str:
+    return "sync_value"
 
-Dependencies can depend on other dependencies, forming a graph that Unchained resolves automatically.
+# Async route using both
+async def async_route(
+    a_val: Annotated[str, Depends(get_async_value)],
+    s_val: Annotated[str, Depends(get_sync_value)],
+):
+    return {"async": a_val, "sync": s_val}
+
+# Sync route using only sync
+def sync_route(s_val: Annotated[str, Depends(get_sync_value)]):
+    return {"sync": s_val}
+
+app = Unchained()
+app.get("/async")(async_route)
+app.get("/sync")(sync_route)
+```
+
+### 3. Caching
+
+By default, Unchained caches the return value of a dependency **within the scope of a single request**. This means if the same dependency callable is requested multiple times (e.g., by different parameters in the same route, or by nested dependencies), the callable is only executed *once* per request, and the cached value is reused.
+
+```python
+counter = 0
+def get_request_service():
+    global counter
+    counter += 1
+    print(f"Executing get_request_service: Count = {counter}")
+    return {"instance_id": counter}
+
+def route_with_cache(
+    service1: Annotated[dict, Depends(get_request_service)],
+    service2: Annotated[dict, Depends(get_request_service)],
+):
+    # service1 and service2 will be the *same* dictionary instance
+    # 'Executing get_request_service' will print only once per request
+    assert service1 is service2
+    return {"s1": service1, "s2": service2, "final_count": counter}
+
+app = Unchained()
+app.get("/cached")(route_with_cache)
+```
+
+You can disable caching for a specific injection using `use_cache=False`:
+
+```python
+# route_without_cache assumes get_request_service is defined as above
+def route_without_cache(
+    service1: Annotated[dict, Depends(get_request_service)], # Cached (first call)
+    service2: Annotated[dict, Depends(get_request_service, use_cache=False)], # Not cached
+):
+    # service1 and service2 will be *different* dictionary instances
+    assert service1 is not service2
+    return {"s1": service1, "s2": service2, "final_count": counter}
+
+app.get("/not-cached")(route_without_cache)
+```
+
+### 4. Nested Dependencies
+
+Dependencies can depend on other dependencies. Unchained automatically resolves the entire dependency tree, respecting the caching rules at each level.
 
 ```python
 from typing import Annotated
-from unchained import Depends, Unchained, Request
+from unchained import Depends, Unchained
+
+class DBConnection: ...
+class UserRepo:
+    def __init__(self, conn: DBConnection):
+        self.conn = conn
+    def get_user(self, user_id: int): ...
+
+def get_db_connection() -> DBConnection:
+    print("Getting DB Connection")
+    return DBConnection()
+
+# UserRepo depends on DBConnection
+def get_user_repo(conn: Annotated[DBConnection, Depends(get_db_connection)]) -> UserRepo:
+    print("Getting User Repo")
+    return UserRepo(conn=conn)
+
+# Route depends on UserRepo
+def get_user_profile(user_id: int, repo: Annotated[UserRepo, Depends(get_user_repo)]):
+    print("Getting User Profile")
+    # Unchained automatically calls get_db_connection, passes the result to
+    # get_user_repo, and passes that result here as 'repo'.
+    # Due to caching, get_db_connection runs only once.
+    user = repo.get_user(user_id)
+    return {"user_data": user} # Example response
 
 app = Unchained()
-
-def first_dependency() -> str:
-    return "world"
-
-# second_dependency depends on first_dependency
-def second_dependency(value: Annotated[str, Depends(first_dependency)]) -> str:
-    return f"wonderful {value}"
-
-@app.get("/hello")
-def hello(
-    request: Request,
-    message: Annotated[str, Depends(second_dependency)] # Resolved recursively
-):
-    return {"message": f"Hello {message}!"}
+app.get("/users/{user_id}")(get_user_profile)
 ```
 
-You can also use [built-in dependencies](./built-in/intro.md) within your custom dependencies and nested dependencies. See the specific documentation for each type for examples.
+This structure allows you to build modular and testable components by managing dependencies explicitly.
 
-## Custom Dependencies
+## Types of Dependencies
 
-TODO
+Unchained offers several ways to inject data or services:
 
-### Function-based Dependency
-
-Functions are straightforward for simpler dependency logic. Here's an example that validates an API key from a header:
-
-```python
-from typing import Annotated
-from unchained import Depends, Unchained, Request
-from unchained.dependencies import Header
-from unchained.errors import AuthorizationError
-
-app = Unchained()
-
-# A simple function dependency
-def verify_api_key(api_key: Annotated[str | None, Header("X-API-Key")] = None) -> str:
-    if not api_key:
-        raise AuthorizationError(message="X-API-Key header is missing")
-    if api_key != "SECRET_KEY":
-        raise AuthorizationError(message="Invalid API Key")
-    return api_key
-
-@app.get("/secure-data")
-def get_secure_data(
-    request: Request,
-    verified_key: Annotated[str, Depends(verify_api_key)]
-):
-    return {"data": "sensitive information", "api_key_used": verified_key}
-```
-
-For more details on extracting headers, see the [Header Dependency](./built-in/header.md) documentation.
-
-### Class-based Dependencies
-TODO
-
-## Built-in & Auto-Injected Dependencies
-
-Unchained provides several built-in dependency utilities and automatically injects certain objects when type-hinted in your route handlers or other dependencies. These simplify common tasks like accessing request data, headers, parameters, and application settings.
-
-Refer to the dedicated documentation for details:
-
-*   [`Request`](./built-in/request.md): Access the raw request object. (Auto-injected)
-*   [`Header`](./built-in/header.md): Extract request headers.
-*   [`Settings`](./built-in/settings.md): Access application settings. (Auto-injected via `SettingsDependency`)
-
-## Dependency Overriding (for Testing)
-TODO
-
-## Async and Sync Support
-
-Unchained seamlessly supports both `async def` and `def` for route handlers and dependency functions. You can mix and match them; Unchained handles running sync dependencies in a thread pool when called from an async context if necessary.
-
-
-
+-   **Built-in Objects**: Automatically inject framework objects.
+    -   [Request Object](./request-object.md)
+    -   [App Object](./app-object.md)
+-   **Parameter Sources**: Extract data directly from the request.
+    -   [Path Parameters](./path-parameters.md)
+    -   [Query Parameters](./query-parameters.md)
+    -   [Header Parameters](./header-parameters.md)
+    -   [Body Parameters](./body-parameters.md)
+-   **Generator Dependencies**: Manage resources with setup and teardown phases.
+    -   [Generator Dependencies (`yield`)](./generator-dependencies.md)
 
 ## Further Reading
 

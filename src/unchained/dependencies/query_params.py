@@ -16,7 +16,8 @@ empty = object()
 
 class QueryParams(BaseCustom, Generic[T]):
     ITERABLES = (list, tuple, set)
-    _ninja_equivalent = Query
+    # FIXME:break tests
+    # _ninja_equivalent = Query
 
     def __init__(
         self,
