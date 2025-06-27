@@ -1,14 +1,16 @@
 from functools import partial
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
-from unchained.dependencies.depends import Depends
 from unchained.signature.signature import Signature
+
+from .depends import Depends
 
 T = TypeVar("T")
 
 
 class BaseCustom(Depends, Generic[T]):
     annotation_type: type[T]
+    _ninja_equivalent: Any
 
     def __init__(
         self,
@@ -22,3 +24,4 @@ class BaseCustom(Depends, Generic[T]):
         self.param_name: str | None = None
         self.annotation_type: type[T]
         self.default: type[T]
+        self.signature_param_name: str | None = None
