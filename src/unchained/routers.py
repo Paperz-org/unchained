@@ -1,5 +1,4 @@
-from unchained.meta import UnchainedRouterMeta
-from unchained.ninja import Router as NinjaRouter
+from fastapi import APIRouter
 
 
-class Router(NinjaRouter, metaclass=UnchainedRouterMeta): ...
+class Router(APIRouter): ...

@@ -3,7 +3,7 @@
 from typing import Callable, cast
 
 from django.db.models import QuerySet
-from django.http import HttpRequest
+from unchained.requests import Request
 
 from unchained.ninja import Query
 from unchained.ninja.pagination import paginate
@@ -20,11 +20,11 @@ from ..types import (
 )
 from .base import BaseViewSet
 
-ListItemsReturnType = Callable[[HttpRequest, Query], QuerySet[ModelType]]
-GetItemReturnType = Callable[[HttpRequest, PKType], ModelType]
-CreateItemReturnType = Callable[[HttpRequest, CreateSchemaType], ModelType]
-UpdateItemReturnType = Callable[[HttpRequest, PKType, UpdateSchemaType], ModelType]
-DeleteItemReturnType = Callable[[HttpRequest, PKType], tuple[int, None]]
+ListItemsReturnType = Callable[[Request, Query], QuerySet[ModelType]]
+GetItemReturnType = Callable[[Request, PKType], ModelType]
+CreateItemReturnType = Callable[[Request, CreateSchemaType], ModelType]
+UpdateItemReturnType = Callable[[Request, PKType, UpdateSchemaType], ModelType]
+DeleteItemReturnType = Callable[[Request, PKType], tuple[int, None]]
 
 
 class SyncViewSet(BaseViewSet[ModelType, CreateSchemaType, ReadSchemaType, UpdateSchemaType, FilterSchemaType, PKType]):
@@ -80,7 +80,7 @@ class SyncViewSet(BaseViewSet[ModelType, CreateSchemaType, ReadSchemaType, Updat
         """List items."""
 
         @paginate
-        def _list_items(request: HttpRequest, filters: self.filter_schema = Query(...)) -> QuerySet[ModelType]:  # noqa: B008
+        def _list_items(filters: self.filter_schema = Query(...)) -> QuerySet[ModelType]:  # noqa: B008
             """List items."""
             return cast(QuerySet[ModelType], filters.filter(self.queryset))
 
@@ -91,7 +91,7 @@ class SyncViewSet(BaseViewSet[ModelType, CreateSchemaType, ReadSchemaType, Updat
         """Get item."""
 
         @rename(pk_name=self.pk_name)
-        def _get_item(request: HttpRequest, pk_name: self.pk_type) -> ModelType:
+        def _get_item(pk_name: self.pk_type) -> ModelType:
             try:
                 return self._get_object(pk_name)
             except self.model.DoesNotExist as e:
@@ -103,7 +103,7 @@ class SyncViewSet(BaseViewSet[ModelType, CreateSchemaType, ReadSchemaType, Updat
     def create_item(self) -> CreateItemReturnType:
         """Create item."""
 
-        def _create_item(request: HttpRequest, payload: self.create_schema) -> ModelType:  # type: ignore[E0611]
+        def _create_item(payload: self.create_schema) -> ModelType:  # type: ignore[E0611]
             """Create item."""
             try:
                 data = payload.dict()
@@ -133,7 +133,7 @@ class SyncViewSet(BaseViewSet[ModelType, CreateSchemaType, ReadSchemaType, Updat
         """Update item."""
 
         @rename(pk_name=self.pk_name)
-        def _update_item(request: HttpRequest, pk_name: self.pk_type, payload: self.update_schema) -> ModelType:  # type: ignore[E0611]
+        def _update_item(pk_name: self.pk_type, payload: self.update_schema) -> ModelType:  # type: ignore[E0611]
             """Update item."""
             try:
                 obj = self._get_object(pk_name)
@@ -186,7 +186,7 @@ class SyncViewSet(BaseViewSet[ModelType, CreateSchemaType, ReadSchemaType, Updat
         """Delete item."""
 
         @rename(pk_name=self.pk_name)
-        def _delete_item(request: HttpRequest, pk_name: self.pk_type) -> tuple[int, None]:
+        def _delete_item(pk_name: self.pk_type) -> tuple[int, None]:
             """Delete item."""
             try:
                 obj = self._get_object(pk_name)

@@ -1,7 +1,6 @@
+# from unchained.ninja.errors import ValidationError as NinjaValidationError
+from fastapi import HTTPException as FastAPIHTTPException
 from pydantic import ValidationError as PydanticValidationError
-
-from unchained.ninja.errors import HttpError as NinjaHTTPError
-from unchained.ninja.errors import ValidationError as NinjaValidationError
 
 
 class UnchainedBaseException(Exception):
@@ -12,9 +11,9 @@ class UnchainedError(UnchainedBaseException):
     pass
 
 
-class ValidationError(UnchainedBaseException, NinjaValidationError):
+class ValidationError(UnchainedBaseException, PydanticValidationError):
     pass
 
 
-class HTTPError(UnchainedBaseException, NinjaHTTPError):
+class HTTPError(UnchainedBaseException, FastAPIHTTPException):
     pass

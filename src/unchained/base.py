@@ -1,4 +1,5 @@
-from unchained.ninja import NinjaAPI
+# from unchained.ninja import NinjaAPI
+from fastapi import FastAPI
 
 
-class BaseUnchained(NinjaAPI): ...
+class BaseUnchained(FastAPI): ...

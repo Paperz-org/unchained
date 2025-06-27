@@ -2,12 +2,12 @@
 
 from typing import Any
 
-from unchained.ninja.errors import HttpError
+from unchained.errors import HTTPError
 
 from .types import ModelType
 
 
-class EntryNotFound(HttpError):  # noqa: N818
+class EntryNotFound(HTTPError):  # noqa: N818
     """Exception raised when an entry is not found."""
 
     def __init__(self, model: type[ModelType], id_: Any) -> None:
@@ -16,7 +16,7 @@ class EntryNotFound(HttpError):  # noqa: N818
         super().__init__(404, message)
 
 
-class BadRequest(HttpError):  # noqa: N818
+class BadRequest(HTTPError):  # noqa: N818
     """Exception raised for bad request errors."""
 
     def __init__(self, message: str) -> None:

@@ -5,10 +5,10 @@ from contextlib import asynccontextmanager, contextmanager
 from typing import Callable, get_args
 
 from fast_depends import inject
+from fastapi.params import Query
 
 from unchained import context
 from unchained.dependencies import BaseCustom
-from unchained.ninja.params import Query
 from unchained.requests import Request
 from unchained.signature import Signature
 from unchained.signature.transformers import (

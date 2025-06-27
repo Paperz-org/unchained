@@ -6,9 +6,11 @@ from typing import Callable, Generic, cast, get_type_hints
 from django.db.models import QuerySet
 from pydantic import Field, create_model
 
-from unchained.ninja import FilterSchema, Router, Schema
-from unchained.ninja.orm import create_schema as generate_schema
-from unchained.ninja.orm.fields import TYPES as NINJA_TYPES_MAP
+from unchained.ninja_crud.schema import Schema
+from unchained.ninja_crud.filter_schema import FilterSchema
+from unchained.ninja_crud.factory import create_schema as generate_schema
+from unchained.ninja_crud.fields import TYPES as NINJA_TYPES_MAP
+from unchained.routers import Router
 
 from .types import (
     CreateSchemaType,
@@ -76,6 +78,8 @@ class CRUDRouter(Generic[ModelType, CreateSchemaType, ReadSchemaType, UpdateSche
             raise ValueError(msg)
 
         self.path = path or model_name.replace(" ", "-").lower()
+        if not self.path.startswith("/"):
+            self.path = "/" + self.path
         self.router = Router(tags=self._tags)
 
         # Register CRUD routes
@@ -202,11 +206,12 @@ class CRUDRouter(Generic[ModelType, CreateSchemaType, ReadSchemaType, UpdateSche
         Args:
             function: The handler function for creating items.
         """
-        self.router.add_api_operation(
+        self.router.add_api_route(
             "/",
-            ["POST"],
             function,
-            response={201: self._read_schema},
+            methods=["POST"],
+            status_code=201,
+            response_model=self._read_schema,
             operation_id=f"create_{self._model._meta.model_name}",
             summary=f"Create {self._swagger_description_model}",
         )
@@ -218,11 +223,12 @@ class CRUDRouter(Generic[ModelType, CreateSchemaType, ReadSchemaType, UpdateSche
         Args:
             function: The handler function for listing items.
         """
-        self.router.add_api_operation(
+        self.router.add_api_route(
             "/",
-            ["GET"],
             function,
-            response=list[self._read_schema],  # type: ignore
+            methods=["GET"],
+            status_code=200,
+            response_model=list[self._read_schema],  # type: ignore
             operation_id=f"list_{self._model._meta.model_name}",
             summary=f"List {self._swagger_description_model}",
         )
@@ -234,11 +240,12 @@ class CRUDRouter(Generic[ModelType, CreateSchemaType, ReadSchemaType, UpdateSche
         Args:
             function: The handler function for retrieving a specific item.
         """
-        self.router.add_api_operation(
+        self.router.add_api_route(
             f"/{{{self._pk_name}}}",
-            ["GET"],
             function,
-            response=self._read_schema,
+            methods=["GET"],
+            status_code=200,
+            response_model=self._read_schema,
             operation_id=f"get_{self._model._meta.model_name}",
             summary=f"Get {self._swagger_description_model}",
         )
@@ -250,11 +257,12 @@ class CRUDRouter(Generic[ModelType, CreateSchemaType, ReadSchemaType, UpdateSche
         Args:
             function: The handler function for updating a specific item.
         """
-        self.router.add_api_operation(
+        self.router.add_api_route(
             f"/{{{self._pk_name}}}",
-            ["PATCH"],
             function,
-            response=self._read_schema,
+            methods=["PATCH"],
+            status_code=200,
+            response_model=self._read_schema,
             operation_id=f"update_{self._model._meta.model_name}",
             summary=f"Update {self._swagger_description_model}",
         )
@@ -266,11 +274,12 @@ class CRUDRouter(Generic[ModelType, CreateSchemaType, ReadSchemaType, UpdateSche
         Args:
             function: The handler function for deleting a specific item.
         """
-        self.router.add_api_operation(
+        self.router.add_api_route(
             f"/{{{self._pk_name}}}",
-            ["DELETE"],
             function,
-            response={204: None},
+            methods=["DELETE"],
+            status_code=204,
+            response_model=None,
             operation_id=f"delete_{self._model._meta.model_name}",
             summary=f"Delete {self._swagger_description_model}",
         )

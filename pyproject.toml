@@ -12,6 +12,7 @@ dependencies = [
     "tomli>=2.2.1",
     "pydantic>=2.6.1",
     "pydantic-settings>=2.8.1",
+    "fastapi>=0.115.14",
 ]
 
 authors = [
