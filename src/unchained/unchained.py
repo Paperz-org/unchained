@@ -14,6 +14,7 @@ from unchained.lifespan import Lifespan
 from unchained.meta import UnchainedMeta, URLPatterns
 from unchained.settings.base import UnchainedSettings
 from unchained.states import BaseState
+from unchained.routers import Router
 
 if TYPE_CHECKING:
     from .models.base import BaseModel
@@ -79,32 +80,33 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
 
         return Lifespan(self, django_app, self._lifespan)
 
-    # def crud(
-    #     self,
-    #     model: "BaseModel",
-    #     create_schema: Any | None = None,
-    #     read_schema: Any | None = None,
-    #     update_schema: Any | None = None,
-    #     filter_schema: Any | None = None,
-    #     path: str | None = None,
-    #     tags: list[str] | None = None,
-    #     queryset: QuerySet | None = None,
-    #     operations: str = "CRUD",
-    # ):
-    #     from unchained.ninja_crud import CRUDRouter  # type: ignore
+    def crud(
+        self,
+        model: "BaseModel",
+        create_schema: Any | None = None,
+        read_schema: Any | None = None,
+        update_schema: Any | None = None,
+        filter_schema: Any | None = None,
+        path: str | None = None,
+        tags: list[str] | None = None,
+        queryset: QuerySet | None = None,
+        operations: str = "CRUD",
+    ):
+        from unchained.ninja_crud import CRUDRouter  # type: ignore
 
-    #     router = CRUDRouter(
-    #         model,
-    #         create_schema=create_schema,
-    #         read_schema=read_schema,
-    #         update_schema=update_schema,
-    #         filter_schema=filter_schema,
-    #         path=path,
-    #         tags=tags,
-    #         queryset=queryset,
-    #         operations=operations,
-    #     )
-    #     self.add_router(router.path, router.router)
+        router = CRUDRouter(
+            model,
+            create_schema=create_schema,
+            read_schema=read_schema,
+            update_schema=update_schema,
+            filter_schema=filter_schema,
+            path=path,
+            tags=tags,
+            queryset=queryset,
+            operations=operations,
+        )
+        self.include_router(router.router, prefix=router.path)
+    
 
     # def __call__(self, *args, **kwargs):
     #     from django.conf import settings

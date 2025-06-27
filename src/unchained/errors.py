@@ -1,4 +1,3 @@
-# from unchained.ninja.errors import ValidationError as NinjaValidationError
 from fastapi import HTTPException as FastAPIHTTPException
 from pydantic import ValidationError as PydanticValidationError
 

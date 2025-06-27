@@ -6,7 +6,9 @@ from unchained.dependencies import Header, QueryParams
 from unchained.dependencies.depends import Depends
 from unchained.ninja_crud import CRUDRouter
 from unchained.routers import Router
+from admin import UserAdmin
 
+print(UserAdmin)
 # router = Router()
 
 
@@ -27,9 +29,7 @@ from unchained.routers import Router
 app = Unchained()
 # app.include_router(router)
 
-router = CRUDRouter(User)
-
-app.include_router(router.router, prefix=router.path)
+app.crud(User)
 
 # def test(q: Annotated[str, QueryParams()]):
 #     return {
