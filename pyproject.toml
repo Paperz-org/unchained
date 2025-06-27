@@ -13,6 +13,7 @@ dependencies = [
     "pydantic>=2.6.1",
     "pydantic-settings>=2.8.1",
     "fastapi>=0.115.14",
+    "httpx>=0.28.1",
 ]
 
 authors = [

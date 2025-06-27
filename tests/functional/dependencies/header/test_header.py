@@ -17,15 +17,15 @@ from unchained.responses import HTTPResponse
 # --- Sync Routes ---
 
 
-def route_sync_required_header(val: Annotated[str, Header("X-Required")]):
+def route_sync_required_header(val: Annotated[str, Header(alias="X-Required")]):
     return {"value": val}
 
 
-def route_sync_optional_header(val: Annotated[str, Header("X-Optional")] = "default"):
+def route_sync_optional_header(val: Annotated[str, Header(alias="X-Optional")] = "default"):
     return {"value": val}
 
 
-def route_sync_case_insensitive(val: Annotated[str, Header("X-Mixed-Case")]):
+def route_sync_case_insensitive(val: Annotated[str, Header(alias="X-Mixed-Case")]):
     return {"value": val}
 
 
@@ -33,22 +33,24 @@ def route_sync_infer_name(x_infer_dash_me: Annotated[str, Header()]):
     return {"value": x_infer_dash_me}
 
 
-def route_sync_multiple_headers(h1: Annotated[str, Header("X-H1")], h2: Annotated[str, Header("X-H2")]) -> dict:
+def route_sync_multiple_headers(
+    h1: Annotated[str, Header(alias="X-H1")], h2: Annotated[str, Header(alias="X-H2")]
+) -> dict:
     return {"h1": h1, "h2": h2}
 
 
 # --- Async Routes ---
 
 
-async def route_async_required_header(val: Annotated[str, Header("X-Required")]):
+async def route_async_required_header(val: Annotated[str, Header(alias="X-Required")]):
     return {"value": val}
 
 
-async def route_async_optional_header(val: Annotated[str, Header("X-Optional")] = "default"):
+async def route_async_optional_header(val: Annotated[str, Header(alias="X-Optional")] = "default"):
     return {"value": val}
 
 
-async def route_async_case_insensitive(val: Annotated[str, Header("X-Mixed-Case")]):
+async def route_async_case_insensitive(val: Annotated[str, Header(alias="X-Mixed-Case")]):
     return {"value": val}
 
 
@@ -56,7 +58,9 @@ async def route_async_infer_name(x_infer_dash_me: Annotated[str, Header()]):
     return {"value": x_infer_dash_me}
 
 
-async def route_async_multiple_headers(h1: Annotated[str, Header("X-H1")], h2: Annotated[str, Header("X-H2")]) -> dict:
+async def route_async_multiple_headers(
+    h1: Annotated[str, Header(alias="X-H1")], h2: Annotated[str, Header(alias="X-H2")]
+) -> dict:
     return {"h1": h1, "h2": h2}
 
 
@@ -154,8 +158,8 @@ async def test_header_required_missing_raises_validation_error(
     )
     error_detail = data["detail"][0]
     assert "msg" in error_detail, f"Route {route_path}: Expected 'msg' in error detail: {error_detail}"
-    assert "Missing header: X-Required" in error_detail["msg"], (
-        f"Route {route_path}: Expected 'Missing header: X-Required' in response detail msg: {error_detail['msg']}"
+    assert "Field required" in error_detail["msg"], (
+        f"Route {route_path}: Expected 'Field required' in response detail msg: {error_detail['msg']}"
     )
 
 

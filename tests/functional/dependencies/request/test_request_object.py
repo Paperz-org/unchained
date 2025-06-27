@@ -15,11 +15,11 @@ from unchained.responses import HTTPResponse
 
 
 def route_sync_request_direct(request: Request):
-    return {"method": request.method, "path": request.path}
+    return {"method": request.method, "path": request.url.path}
 
 
 def dep_sync_uses_request(request: Request):
-    return {"dep_method": request.method, "dep_path": request.path}
+    return {"dep_method": request.method, "dep_path": request.url.path}
 
 
 def route_sync_uses_dep_with_request(data: Annotated[dict, Depends(dep_sync_uses_request)]):
@@ -30,11 +30,11 @@ def route_sync_uses_dep_with_request(data: Annotated[dict, Depends(dep_sync_uses
 
 
 async def route_async_request_direct(request: Request):
-    return {"method": request.method, "path": request.path}
+    return {"method": request.method, "path": request.url.path}
 
 
 async def dep_async_uses_request(request: Request):
-    return {"dep_method": request.method, "dep_path": request.path}
+    return {"dep_method": request.method, "dep_path": request.url.path}
 
 
 async def route_async_uses_dep_with_request(data: Annotated[dict, Depends(dep_async_uses_request)]):

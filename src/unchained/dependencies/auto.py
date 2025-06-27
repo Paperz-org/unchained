@@ -1,9 +1,8 @@
 from typing import Annotated
 
-from fast_depends.dependencies import model
-
 from unchained import context
 from unchained.base import BaseUnchained
+from unchained.dependencies import Depends
 from unchained.requests import Request
 from unchained.settings.base import UnchainedSettings
 from unchained.states import BaseState
@@ -13,14 +12,14 @@ def _get_app():
     return context.app.get()
 
 
-AppDependency = Annotated[BaseUnchained, model.Depends(_get_app)]
+AppDependency = Annotated[BaseUnchained, Depends(_get_app)]
 
 
 def _get_request():
     return context.request.get()
 
 
-RequestDependency = Annotated[Request, model.Depends(_get_request)]
+RequestDependency = Annotated[Request, Depends(_get_request)]
 
 
 def _get_settings(app: AppDependency) -> UnchainedSettings:
@@ -31,8 +30,8 @@ def _get_state(app: AppDependency) -> BaseState:
     return app.state
 
 
-SettingsDependency = Annotated[UnchainedSettings, model.Depends(_get_settings)]
-StateDependency = Annotated[BaseState, model.Depends(_get_state)]
+SettingsDependency = Annotated[UnchainedSettings, Depends(_get_settings)]
+StateDependency = Annotated[BaseState, Depends(_get_state)]
 
 
 # from unchained.dependencies.query_params import QueryParams

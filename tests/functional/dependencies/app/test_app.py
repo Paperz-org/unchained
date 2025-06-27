@@ -9,15 +9,16 @@ from _pytest.fixtures import FixtureRequest
 
 from tests.utils.client import UnchainedAsyncTestClient, UnchainedTestClient
 from unchained import Depends, Unchained
+from unchained.dependencies.auto import AppDependency
 
 # --- Sync Routes & Dependencies ---
 
 
-def route_sync_app_direct(injected_app: Unchained):
+def route_sync_app_direct(injected_app: AppDependency):
     return {"injected_app_id": id(injected_app)}
 
 
-def dep_sync_uses_app(injected_app: Unchained):
+def dep_sync_uses_app(injected_app: AppDependency):
     return {"dep_injected_app_id": id(injected_app)}
 
 
@@ -28,11 +29,11 @@ def route_sync_uses_dep_with_app(data: Annotated[dict, Depends(dep_sync_uses_app
 # --- Async Routes & Dependencies ---
 
 
-async def route_async_app_direct(injected_app: Unchained):
+async def route_async_app_direct(injected_app: AppDependency):
     return {"injected_app_id": id(injected_app)}
 
 
-async def dep_async_uses_app(injected_app: Unchained):
+async def dep_async_uses_app(injected_app: AppDependency):
     return {"dep_injected_app_id": id(injected_app)}
 
 

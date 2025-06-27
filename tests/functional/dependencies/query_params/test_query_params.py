@@ -25,7 +25,7 @@ def route_sync_query_optional(q: Annotated[str, QueryParams()] = "default"):
     return {"q": q}
 
 
-def route_sync_query_typed(limit: Annotated[int, QueryParams(default=10)]):
+def route_sync_query_typed(limit: int = QueryParams(default=10)):
     return {"limit": limit}
 
 
@@ -37,7 +37,7 @@ def route_sync_query_multi_value_builtin(tags: Annotated[list[str], QueryParams(
     return {"tags": tags}
 
 
-def route_sync_query_optional_none(q: Annotated[Optional[str], QueryParams(default=None)]):
+def route_sync_query_optional_none(q: Optional[str] = QueryParams(default=None)):
     return {"q": q}
 
 
@@ -52,11 +52,11 @@ async def route_async_query_required(q: Annotated[str, QueryParams()]):
     return {"q": q}
 
 
-async def route_async_query_optional(q: Annotated[str, QueryParams()] = "default"):
+async def route_async_query_optional(q: Annotated[str, QueryParams] = "default"):
     return {"q": q}
 
 
-async def route_async_query_typed(limit: Annotated[int, QueryParams(default=10)]):
+async def route_async_query_typed(limit: int = QueryParams(default=10)):
     return {"limit": limit}
 
 
@@ -68,7 +68,7 @@ async def route_async_query_multi_value_builtin(tags: Annotated[list[str], Query
     return {"tags": tags}
 
 
-async def route_async_query_optional_none(q: Annotated[Optional[str], QueryParams(default=None)]):
+async def route_async_query_optional_none(q: Optional[str] = QueryParams(default=None)):
     return {"q": q}
 
 
@@ -202,7 +202,7 @@ async def test_query_required_missing_error(
     )
     error_detail = data["detail"][0]
     assert "msg" in error_detail, f"Route {route_path}: Expected 'msg' in error detail: {error_detail}"
-    assert "missing query parameter" in error_detail["msg"].lower() and "q" in error_detail["msg"], (
+    assert "field required" in error_detail["msg"].lower() and "q" in error_detail["msg"], (
         f"Route {route_path}: Expected missing query param error for 'q', got: {error_detail['msg']}"
     )
 
@@ -323,7 +323,7 @@ async def test_query_type_conversion_error(
     )
     error_detail = data["detail"][0]
     assert "msg" in error_detail, f"Route {query_path}: Expected 'msg' in error detail: {error_detail}"
-    assert "invalid literal" in error_detail["msg"].lower(), (
+    assert "input should be a valid integer" in error_detail["msg"].lower(), (
         f"Route {query_path}: Expected validation error message not found in response detail msg: {error_detail['msg']}"
     )
 

@@ -113,7 +113,11 @@ PARAMETRIZE_DATACLASS = pytest.mark.parametrize(
 # --- Test Helpers ---
 
 
-async def make_request(test_client, route_path: str, is_async: bool) -> HTTPResponse:
+async def make_request(
+    test_client: UnchainedAsyncTestClient | UnchainedTestClient,
+    route_path: str,
+    is_async: bool,
+) -> HTTPResponse:
     if is_async:
         return await test_client.get(route_path)
     else:

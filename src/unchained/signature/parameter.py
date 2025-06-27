@@ -79,16 +79,6 @@ class Parameter(inspect.Parameter):
         """Check if the parameter is an auto depends parameter."""
         return self.is_request or self.is_settings or self.is_app or self.is_state
 
-    @property
-    def is_custom_depends(self) -> bool:
-        """Check if the parameter is a custom depends parameter."""
-        from unchained.dependencies import BaseCustom
-
-        if self.is_annotated:
-            _, instance = get_args(self.annotation)
-            return isinstance(instance, BaseCustom)
-        return issubclass(self.annotation, BaseCustom)
-
     @classmethod
     def from_parameter(cls, param: inspect.Parameter) -> "Parameter":
         """Create an UnchainedParam instance from an inspect.Parameter."""

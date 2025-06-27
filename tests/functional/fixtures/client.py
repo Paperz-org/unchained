@@ -4,7 +4,10 @@ Global test configuration and shared fixtures.
 This file contains fixtures that can be used across multiple test modules.
 """
 
+from typing import AsyncGenerator
+
 import pytest
+from httpx import ASGITransport, AsyncClient
 
 from unchained import Unchained
 
@@ -27,4 +30,5 @@ def test_client(app: Unchained) -> UnchainedTestClient:
 @pytest.fixture
 def async_test_client(app: Unchained) -> UnchainedAsyncTestClient:
     """Provides a test client for the Unchained application."""
-    return UnchainedAsyncTestClient(app)
+    client = AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
+    return client
