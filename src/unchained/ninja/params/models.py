@@ -97,7 +97,10 @@ class QueryModel(ParamModel):
         cls, request: HttpRequest, api: "NinjaAPI", path_params: DictStrAny
     ) -> Optional[DictStrAny]:
         list_fields = getattr(cls, "__ninja_collection_fields__", [])
-        return api.parser.parse_querydict(request.GET, list_fields, request)
+        # breakpoint()
+        # list_fields = ["tags"]
+        query_dict = api.parser.parse_querydict(request.GET, list_fields, request)
+        return query_dict
 
 
 class PathModel(ParamModel):

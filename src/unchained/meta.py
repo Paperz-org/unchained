@@ -51,17 +51,20 @@ class UnchainedBaseMeta(type):
                                     ninja_contribute_args.append(
                                         (
                                             param_name,
-                                        type_,
-                                        instance._ninja_equivalent(...),
+                                            type_,
+                                            instance._ninja_equivalent(...),
                                         )
                                     )
 
                                 for dependency_name, dependency in instance._signature_meta_data.items():
+                                    # breakpoint()
+                                    # type_ = get_args(dependency)
+                                    # print(dependency, dependency_name, type_, instance)
                                     if hasattr(dependency, "_ninja_equivalent"):
                                         ninja_contribute_args.append(
                                             (
                                                 dependency_name,
-                                                type_,
+                                                dependency.annotation_type,
                                                 dependency._ninja_equivalent(...),
                                             )
                                         )
@@ -70,6 +73,7 @@ class UnchainedBaseMeta(type):
                         signature_with_auto_dependencies = create_signature_with_auto_dependencies(signature)
 
                         api_func.__signature__ = signature_with_auto_dependencies
+                        # breakpoint()
 
                         injected = inject(api_func)
 

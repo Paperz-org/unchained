@@ -22,6 +22,7 @@ class Depends(model.Depends):
         signature = Signature.from_callable(self.dependency)
         # Here we inject the param name and the annotation type to CustomDependencies
         for param in signature.parameters.values():
+            # breakpoint()
             if param.is_custom_depends:
                 type_, instance = get_args(param.annotation)
                 # Add the type to the CustomField

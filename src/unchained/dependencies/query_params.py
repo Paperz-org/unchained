@@ -1,4 +1,5 @@
 import inspect
+import traceback
 from typing import Generic, Literal, TypeVar, cast, get_origin
 
 from pydantic import BaseModel
@@ -17,7 +18,7 @@ empty = object()
 class QueryParams(BaseCustom, Generic[T]):
     ITERABLES = (list, tuple, set)
     # FIXME:break tests
-    # _ninja_equivalent = Query
+    _ninja_equivalent = Query
 
     def __init__(
         self,
@@ -46,7 +47,7 @@ class QueryParams(BaseCustom, Generic[T]):
                     annotation_type = get_optional_annotation(annotation_type)
 
                 annotation_origin = get_origin(annotation_type)
-
+                # breakpoint()
                 if annotation_origin is not None:
                     if annotation_origin is list:
                         return list(query_params.getlist(param_name))  # type: ignore

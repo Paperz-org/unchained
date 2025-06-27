@@ -1,10 +1,10 @@
 from typing import Generic, TypeVar, cast
 
-from ninja.errors import ValidationError
 from pydantic import BaseModel
 
-from unchained.request import Request
 from unchained.dependencies.custom import BaseCustom
+from unchained.ninja.errors import ValidationError
+from unchained.requests import Request
 
 T = TypeVar("T")
 
@@ -22,10 +22,10 @@ class JsonBody(BaseCustom, Generic[T]):
         if not request.has_body:
             if self.default is not None:
                 return self.default
-            
+
             if self.required:
                 raise ValidationError([{"msg": "Missing request body"}])
-            
+
             return None
 
         if self.embed:
@@ -35,18 +35,14 @@ class JsonBody(BaseCustom, Generic[T]):
         else:
             body_data = request.json()
 
-         
         if issubclass(self.annotation_type, BaseModel):
             try:
                 return cast(T, self.annotation_type.model_validate(body_data))
             except Exception as e:
                 raise ValidationError([{"msg": f"Invalid request body: {str(e)}"}])
-        
+
         # For non-BaseModel types, try direct casting
         try:
             return cast(T, self.annotation_type(body_data))
         except Exception as e:
             raise ValidationError([{"msg": f"Failed to parse body: {str(e)}"}])
-
-
-

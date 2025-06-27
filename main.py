@@ -1,22 +1,26 @@
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 
 from unchained import Unchained
 from unchained.dependencies import QueryParams
+from unchained.dependencies.depends import Depends
 
 app = Unchained()
 
-@app.get("/search/")
-def search(
-    q: Annotated[str, QueryParams()],
-    tags: Annotated[list[str], QueryParams()],
-    page_size: Annotated[int, QueryParams(default=10)],
-    page: Annotated[int, QueryParams()] = 1,
-    include_details: Annotated[Optional[bool], QueryParams()] = None,
-):
+
+def test(q: Annotated[str, QueryParams()]):
     return {
         "query": q,
-        "page": page,
-        "size": page_size,
-        "details": include_details,
-        "tags": tags or [],
+        # "tags": tags,
+    }
+
+
+@app.get("/search/")
+def search(
+    # test: Annotated[dict, Depends(test)],
+    page_size: Annotated[int, QueryParams(default=10)],
+    tags: Annotated[list[str], QueryParams()],
+):
+    return {
+        "test": test,
+        "tags": tags,
     }

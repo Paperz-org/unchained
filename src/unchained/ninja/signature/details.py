@@ -1,7 +1,7 @@
 import inspect
 import warnings
 from collections import defaultdict, namedtuple
-from typing import Any, Callable, Dict, Generator, List, Optional, Tuple
+from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, get_args, get_origin
 
 import pydantic
 from django.http import HttpResponse
@@ -89,8 +89,9 @@ class ViewSignature:
             # which allows developers to create custom function params
             # inside decorators or other functions
             for p_name, p_type, p_source in view_func._ninja_contribute_args:
+                # breakpoint()
                 self.params.append(
-                    FuncParam(p_name, p_source.alias or p_name, p_source, p_type, False)
+                    FuncParam(p_name, p_source.alias or p_name, p_source, p_type, get_origin(p_type) is list)
                 )
 
         self.models: TModels = self._create_models()
@@ -172,6 +173,7 @@ class ViewSignature:
             attrs["__annotations__"] = {i.name: i.annotation for i in args}
 
             # collection fields:
+            # breakpoint()
             attrs["__ninja_collection_fields__"] = detect_collection_fields(
                 args, attrs.get("__ninja_flatten_map__", {})
             )
