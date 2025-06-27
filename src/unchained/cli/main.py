@@ -48,7 +48,7 @@ def runserver(
     # Only import uvicorn when needed
     import uvicorn
 
-    uvicorn.run(path, host=host, port=port, reload=reload, factory=True)
+    uvicorn.run(path, host=host, port=port, reload=reload, factory=False)
 
 
 @app.command(name="collectstatic")
