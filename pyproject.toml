@@ -12,7 +12,7 @@ dependencies = [
     "tomli>=2.2.1",
     "pydantic>=2.6.1",
     "pydantic-settings>=2.8.1",
-    "penta",
+    "penta>=0.2.0",
 ]
 
 authors = [
@@ -44,6 +44,7 @@ dev = [
     "ruff>=0.11.2",
     "pdbpp>=0.10.3",
     "pytest-asyncio>=0.26.0",
+    "ty>=0.0.1a13",
 ]
 doc = [
     "mkdocs==1.6.1",
@@ -59,22 +60,15 @@ doc = [
 
 [tool.mypy]
 files = ["src/unchained"]
-exclude = [
-    "src/unchained/ninja",
-    "src/unchained/ninja_crud",
-]
+exclude = ["src/unchained/ninja", "src/unchained/ninja_crud"]
 
 [tool.ruff]
 line-length = 120
-exclude = [
-    "src/unchained/ninja",
-    "src/unchained/ninja_crud",
-]
+exclude = ["src/unchained/ninja", "src/unchained/ninja_crud"]
 
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
 
 [tool.uv.sources]
-penta = { path = "../penta/dist/penta-0.2.1.dev0-py3-none-any.whl" }
-
+penta = { path = "../penta/dist/penta-0.2.1.dev3-py3-none-any.whl" }
