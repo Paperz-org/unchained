@@ -1,5 +1,4 @@
-from unchained.meta import UnchainedRouterMeta
-from penta import Router as NinjaRouter
+from penta import Router as PentaRouter
 
 
-class Router(NinjaRouter, metaclass=UnchainedRouterMeta): ...
+class Router(PentaRouter): ...
