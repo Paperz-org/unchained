@@ -1,10 +1,5 @@
-from typing import Any, Callable, get_args
 
-from fast_depends.dependencies import model
-from penta.dependencies.depends import Depends, _Depends
 
-from unchained.signature import Signature
-from unchained.signature.transformers import create_signature_with_auto_dependencies
 
 
 # class Depends(model.Depends):

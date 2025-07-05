@@ -27,8 +27,8 @@ SettingsDependency = Annotated[UnchainedSettings, model.Depends(_get_settings)]
 StateDependency = Annotated[BaseState, model.Depends(_get_state)]
 
 
-#from unchained.dependencies.query_params import QueryParams
-#QueryParamsDependency = Annotated[str, QueryParams()]
+# from unchained.dependencies.query_params import QueryParams
+# QueryParamsDependency = Annotated[str, QueryParams()]
 
-#from unchained.dependencies.header import Header
-#HeaderDependency = Annotated[str, Header()]
+# from unchained.dependencies.header import Header
+# HeaderDependency = Annotated[str, Header()]

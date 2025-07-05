@@ -18,6 +18,7 @@ from unchained.states import BaseState
 if TYPE_CHECKING:
     from .models.base import BaseModel
 
+
 class Unchained(BaseUnchained, metaclass=UnchainedMeta):
     APP_NAME = "unchained.app"
     urlpatterns = URLPatterns()

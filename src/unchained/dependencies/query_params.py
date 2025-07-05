@@ -9,7 +9,6 @@ from unchained.request import Request
 T = TypeVar("T")
 
 
-
 class QueryParams(BaseCustom, Generic[T]):
     ITERABLES = (list, tuple, set)
 
@@ -40,21 +39,20 @@ class QueryParams(BaseCustom, Generic[T]):
             raise ValidationError([{"msg": f"Missing query parameter: {self.param_name}"}])
 
         return None
-    
+
     def _get_model_values(self, query_params: dict[str, str]) -> dict[str, str | list[str]]:
         model_values = {}
-    
+
         for field_name, field in self.annotation_type.model_fields.items():
-            
             if field_name not in query_params:
                 continue
-            
+
             origin = get_origin(field.annotation)
 
             if origin in self.ITERABLES:
                 model_values[field_name] = query_params.getlist(field_name)
                 continue
-            
+
             try:
                 if issubclass(origin, self.ITERABLES):
                     model_values[field_name] = query_params.getlist(field_name)
@@ -64,6 +62,5 @@ class QueryParams(BaseCustom, Generic[T]):
                 model_values[field_name] = query_params.get(field_name)
             finally:
                 continue
-            
 
         return model_values

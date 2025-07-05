@@ -33,5 +33,3 @@ class Header(BaseCustom, Generic[T]):
             raise ValidationError([{"msg": f"Missing header: {self.param_name}"}])
 
         return None
-
-

@@ -2,6 +2,7 @@ import inspect
 
 from unchained.signature.parameter import Parameter
 
+
 class Signature(inspect.Signature):
     parameters: dict[str, Parameter]
 
