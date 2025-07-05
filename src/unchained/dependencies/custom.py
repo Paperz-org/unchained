@@ -1,8 +1,9 @@
 from functools import partial
 from typing import Generic, TypeVar
 
+from penta.signature import Signature
+
 from unchained.dependencies.depends import _Depends
-from unchained.signature.signature import Signature
 
 T = TypeVar("T")
 
