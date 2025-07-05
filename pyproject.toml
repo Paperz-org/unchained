@@ -12,7 +12,7 @@ dependencies = [
     "tomli>=2.2.1",
     "pydantic>=2.6.1",
     "pydantic-settings>=2.8.1",
-    "penta>=0.2.0",
+    "penta>=0.3.0",
 ]
 
 authors = [
@@ -69,6 +69,3 @@ exclude = ["src/unchained/ninja", "src/unchained/ninja_crud"]
 [tool.setuptools_scm]
 version_scheme = "guess-next-dev"
 local_scheme = "no-local-version"
-
-[tool.uv.sources]
-penta = { path = "../penta/dist/penta-0.2.1.dev3-py3-none-any.whl" }

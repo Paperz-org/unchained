@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version < '3.13'",
@@ -140,7 +141,7 @@ name = "click"
 version = "8.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/60/6c/8ca2efa64cf75a977a0d7fac081354553ebe483345c734fb6b6515d96bbc/click-8.2.1.tar.gz", hash = "sha256:27c491cc05d968d271d5a1db13e3b5a184636d9d930f148c50b038f0d0646202", size = 286342 }
 wheels = [
@@ -244,7 +245,7 @@ name = "fancycompleter"
 version = "0.11.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pyreadline3", marker = "python_full_version < '3.13' and platform_system == 'Windows'" },
+    { name = "pyreadline3", marker = "python_full_version < '3.13' and sys_platform == 'win32'" },
     { name = "pyrepl", marker = "python_full_version < '3.13'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/4e/4c/d11187dee93eff89d082afda79b63c79320ae1347e49485a38f05ad359d0/fancycompleter-0.11.1.tar.gz", hash = "sha256:5b4ad65d76b32b1259251516d0f1cb2d82832b1ff8506697a707284780757f69", size = 341776 }
@@ -514,7 +515,7 @@ version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "ghp-import" },
     { name = "jinja2" },
     { name = "markdown" },
@@ -757,37 +758,17 @@ wheels = [
 
 [[package]]
 name = "penta"
-version = "0.2.1.dev3"
-source = { path = "../penta/dist/penta-0.2.1.dev3-py3-none-any.whl" }
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "fast-depends" },
     { name = "pydantic" },
     { name = "ruff" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/a1/0e/96f59f3c46181d250fac2628d9cb57946d898b89eb3fcf2aaa72fa98eba2/penta-0.3.0.tar.gz", hash = "sha256:fe171316f38dc089fa39a51cfee5317d22659be6e0e0d722e06a191e0c145612", size = 3779683 }
 wheels = [
-    { filename = "penta-0.2.1.dev3-py3-none-any.whl", hash = "sha256:f5dffa9ad531af7cf30df4ba4bc44c9a7ff6f6d7783f6d618b5087089c49380b" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "django", specifier = ">=3.1,<6.0" },
-    { name = "django-stubs", marker = "extra == 'test'" },
-    { name = "fast-depends", specifier = ">=2.4.12" },
-    { name = "markdown-include", marker = "extra == 'doc'" },
-    { name = "mkdocs", marker = "extra == 'doc'" },
-    { name = "mkdocs-material", marker = "extra == 'doc'" },
-    { name = "mkdocstrings", marker = "extra == 'doc'" },
-    { name = "mypy", marker = "extra == 'test'", specifier = "==1.7.1" },
-    { name = "pre-commit", marker = "extra == 'dev'" },
-    { name = "psycopg2-binary", marker = "extra == 'test'" },
-    { name = "pydantic", specifier = ">=2.0,<3.0.0" },
-    { name = "pytest", marker = "extra == 'test'" },
-    { name = "pytest-asyncio", marker = "extra == 'test'" },
-    { name = "pytest-cov", marker = "extra == 'test'" },
-    { name = "pytest-django", marker = "extra == 'test'" },
-    { name = "ruff", specifier = ">=0.5.7" },
-    { name = "ruff", marker = "extra == 'test'", specifier = "==0.5.7" },
+    { url = "https://files.pythonhosted.org/packages/ae/6c/4d1099100d4f034200807d280fb805e733d78d1c7aeb247594ad4922cc9e/penta-0.3.0-py3-none-any.whl", hash = "sha256:82a7ff8b403e4b6866808975c4cc0877b648d2491bc24c19daa7befa3de841a4", size = 2442543 },
 ]
 
 [[package]]
@@ -1351,7 +1332,6 @@ wheels = [
 
 [[package]]
 name = "unchained"
-version = "0.1.7.dev3"
 source = { editable = "." }
 dependencies = [
     { name = "django-jazzmin" },
@@ -1391,7 +1371,7 @@ doc = [
 requires-dist = [
     { name = "django-jazzmin", specifier = ">=3.0.1" },
     { name = "fast-depends", specifier = ">=2.4.12" },
-    { name = "penta", path = "../penta/dist/penta-0.2.1.dev3-py3-none-any.whl" },
+    { name = "penta", specifier = ">=0.3.0" },
     { name = "pydantic", specifier = ">=2.6.1" },
     { name = "pydantic-settings", specifier = ">=2.8.1" },
     { name = "tomli", specifier = ">=2.2.1" },
