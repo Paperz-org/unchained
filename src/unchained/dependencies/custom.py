@@ -1,13 +1,13 @@
 from functools import partial
 from typing import Generic, TypeVar
 
-from unchained.dependencies.depends import Depends
+from unchained.dependencies.depends import _Depends
 from unchained.signature.signature import Signature
 
 T = TypeVar("T")
 
 
-class BaseCustom(Depends, Generic[T]):
+class BaseCustom(_Depends, Generic[T]):
     annotation_type: type[T]
 
     def __init__(

@@ -38,7 +38,6 @@ class MandatoryDjangoSettings:
             settings[key] = value
 
         return settings
-    
 
     def app_migration_module(self) -> str:
         return self.MIGRATION_MODULES["app"]

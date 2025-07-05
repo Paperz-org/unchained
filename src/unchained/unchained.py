@@ -18,6 +18,7 @@ from unchained.states import BaseState
 if TYPE_CHECKING:
     from .models.base import BaseModel
 
+
 class Unchained(BaseUnchained, metaclass=UnchainedMeta):
     APP_NAME = "unchained.app"
     urlpatterns = URLPatterns()
@@ -87,7 +88,7 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
         queryset: QuerySet | None = None,
         operations: str = "CRUD",
     ):
-        from unchained.ninja_crud import CRUDRouter  # type: ignore
+        from penta.crud import CRUDRouter  # type: ignore
 
         router = CRUDRouter(
             model,

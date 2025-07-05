@@ -1,4 +1,4 @@
-from unchained.ninja import NinjaAPI
+from penta import Penta
 
 
-class BaseUnchained(NinjaAPI): ...
+class BaseUnchained(Penta): ...

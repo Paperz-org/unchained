@@ -130,7 +130,6 @@ def showmigration(
     if not settings.configured:
         echo("Error: Django settings are not configured. Ensure your app properly configures settings.")
         return
-    
 
     from django.core.management import call_command
 
