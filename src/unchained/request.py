@@ -1,5 +1,3 @@
-from django.core.handlers.asgi import ASGIRequest
+from penta.request import Request
 
-class Request(ASGIRequest):
-    def query_params(self):
-        return self.GET
+__all__ = ["Request"]

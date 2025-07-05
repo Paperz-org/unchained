@@ -1,7 +1,7 @@
-from unchained.dependencies.auto import AppDependency, RequestDependency, SettingsDependency, StateDependency
+from unchained.dependencies.auto import AppDependency, SettingsDependency, StateDependency
 from unchained.signature.signature import Signature
 from unchained.signature.parameter import Parameter
-
+from penta.dependencies.request import RequestDependency
 
 def create_signature_without_annotated(signature: Signature) -> Signature:
     """

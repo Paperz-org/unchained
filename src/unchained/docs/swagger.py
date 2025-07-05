@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-from unchained.ninja.openapi.docs import Swagger
+from penta.openapi.docs import Swagger
 
 template_path = Path(__file__).parent.parent / "templates/swagger.html"
 

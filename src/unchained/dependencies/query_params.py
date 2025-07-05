@@ -3,7 +3,7 @@ from typing import Generic, TypeVar, cast, get_origin
 from pydantic import BaseModel
 
 from unchained.dependencies.custom import BaseCustom
-from unchained.ninja.errors import ValidationError
+from penta.errors import ValidationError
 from unchained.request import Request
 
 T = TypeVar("T")

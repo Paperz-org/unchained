@@ -4,7 +4,6 @@ from fast_depends.dependencies import model
 
 from unchained import context
 from unchained.base import BaseUnchained
-from unchained.request import Request
 from unchained.settings.base import UnchainedSettings
 from unchained.states import BaseState
 
@@ -15,12 +14,6 @@ def _get_app():
 
 AppDependency = Annotated[BaseUnchained, model.Depends(_get_app)]
 
-
-def _get_request():
-    return context.request.get()
-
-
-RequestDependency = Annotated[Request, model.Depends(_get_request)]
 
 def _get_settings(app: AppDependency) -> UnchainedSettings:
     return app.settings

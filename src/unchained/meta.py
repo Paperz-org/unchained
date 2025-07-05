@@ -4,7 +4,6 @@ from typing import Callable, get_args
 from fast_depends import inject
 
 from unchained.dependencies.custom import BaseCustom
-from unchained.request import Request
 from unchained.signature import Signature
 import functools
 import copy
@@ -22,14 +21,8 @@ class UnchainedBaseMeta(type):
             def _create_injected_decorator(http_method):
                 def decorator(*decorator_args, **decorator_kwargs):
                     def wrapper(api_func):
-                        if hasattr(api_func, "_original_api_func"):
-                            api_func = api_func._original_api_func
 
-                        # Get the signature of the API function
                         signature = Signature.from_callable(api_func)
-                        # TODO msut work but ????????????????????????????????????
-                        # _original_signature = Signature.from_callable(api_func)
-                        _original_signature = copy.deepcopy(signature)
 
                         for param_name, param in signature.parameters.items():
                             if param.is_custom_depends:
@@ -43,52 +36,23 @@ class UnchainedBaseMeta(type):
 
                         api_func.__signature__ = signature_with_auto_dependencies
 
-                        injected = inject(api_func)
-
-                        # Update function signature with new parameters
-                        # We remove the annotated parameters from the signature to allow Django Ninja to correctly parse the parameters
-                        api_func.__signature__ = create_signature_without_annotated(signature_with_auto_dependencies)
-
-                        def _prepare_execution(func_args, func_kwargs):
-                            api_func.__signature__ = signature
-
-                            # Get the request parameter
-                            request = func_args[0]
-
-                            # This is a trick to override the class of the request ... After the instanciation
-                            # `request` is an ASGIRequest instance from Django.
-                            # `Request` is our custom class, that inherit from ASGIRequest.
-                            # With this trick, we are changing the type of the instance
-                            # It like ... inheritence in the future ¯\_(ツ)_/¯
-                            request.__class__ = Request
-
-                            # Set the context request in ContextVar
-                            context.request.set(request)
-
-                            func_args = func_args[1:]
-                            return func_args, func_kwargs
-
+            
                         # Here is the sync last decorator
                         @functools.wraps(api_func)
                         def decorated(*func_args, **func_kwargs):
-                            func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
                             # This is the API result:
-                            return injected(*func_args, **func_kwargs)
+                            return api_func(*func_args, **func_kwargs)
 
                         # Here is the async last decorator
                         @functools.wraps(api_func)
                         async def adecorated(*func_args, **func_kwargs):
-                            func_args, func_kwargs = _prepare_execution(func_args, func_kwargs)
                             # This is the API result:
-                            res = await injected(*func_args, **func_kwargs)
+                            res = await api_func(*func_args, **func_kwargs)
                             return res
 
                         result = http_method(*decorator_args, **decorator_kwargs)(
                             adecorated if asyncio.iscoroutinefunction(api_func) else decorated
                         )
-
-                        api_func.__signature__ = _original_signature
-                        result._original_api_func = api_func
 
                         return result
 

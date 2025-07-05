@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.11"
 resolution-markers = [
     "python_full_version >= '3.13'",
@@ -148,7 +149,7 @@ name = "click"
 version = "8.1.8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/b9/2e/0090cbf739cee7d23781ad4b89a9894a41538e4fcf4c31dcdd705b78eb8b/click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a", size = 226593 }
 wheels = [
@@ -253,7 +254,7 @@ name = "fancycompleter"
 version = "0.9.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "pyreadline", marker = "platform_system == 'Windows'" },
+    { name = "pyreadline", marker = "sys_platform == 'win32'" },
     { name = "pyrepl" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a9/95/649d135442d8ecf8af5c7e235550c628056423c96c4bc6787348bdae9248/fancycompleter-0.9.1.tar.gz", hash = "sha256:09e0feb8ae242abdfd7ef2ba55069a46f011814a80fe5476be48f51b00247272", size = 10866 }
@@ -523,7 +524,7 @@ version = "1.6.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
-    { name = "colorama", marker = "platform_system == 'Windows'" },
+    { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "ghp-import" },
     { name = "jinja2" },
     { name = "markdown" },
@@ -763,6 +764,42 @@ sdist = { url = "https://files.pythonhosted.org/packages/1f/a3/c4bd048256fd4b7d2
 wheels = [
     { url = "https://files.pythonhosted.org/packages/93/ee/491e63a57fffa78b9de1c337b06c97d0cd0753e88c00571c7b011680332a/pdbpp-0.10.3-py2.py3-none-any.whl", hash = "sha256:79580568e33eb3d6f6b462b1187f53e10cd8e4538f7d31495c9181e2cf9665d1", size = 23961 },
 ]
+
+[[package]]
+name = "penta"
+version = "0.2.1.dev0"
+source = { path = "../penta/dist/penta-0.2.1.dev0-py3-none-any.whl" }
+dependencies = [
+    { name = "django" },
+    { name = "fast-depends" },
+    { name = "pydantic" },
+    { name = "ruff" },
+]
+wheels = [
+    { filename = "penta-0.2.1.dev0-py3-none-any.whl", hash = "sha256:2e2a5b718c5689dbae6249e19a790aa97c3bb8d91d459c59c5389ec781f1a3c1" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "django", specifier = ">=3.1,<6.0" },
+    { name = "django-stubs", marker = "extra == 'test'" },
+    { name = "fast-depends", specifier = ">=2.4.12" },
+    { name = "markdown-include", marker = "extra == 'doc'" },
+    { name = "mkdocs", marker = "extra == 'doc'" },
+    { name = "mkdocs-material", marker = "extra == 'doc'" },
+    { name = "mkdocstrings", marker = "extra == 'doc'" },
+    { name = "mypy", marker = "extra == 'test'", specifier = "==1.7.1" },
+    { name = "pre-commit", marker = "extra == 'dev'" },
+    { name = "psycopg2-binary", marker = "extra == 'test'" },
+    { name = "pydantic", specifier = ">=2.0,<3.0.0" },
+    { name = "pytest", marker = "extra == 'test'" },
+    { name = "pytest-asyncio", marker = "extra == 'test'" },
+    { name = "pytest-cov", marker = "extra == 'test'" },
+    { name = "pytest-django", marker = "extra == 'test'" },
+    { name = "ruff", specifier = ">=0.5.7" },
+    { name = "ruff", marker = "extra == 'test'", specifier = "==0.5.7" },
+]
+provides-extras = ["test", "doc", "dev"]
 
 [[package]]
 name = "pexpect"
@@ -1292,11 +1329,11 @@ wheels = [
 
 [[package]]
 name = "unchained"
-version = "0.0.2.dev63"
 source = { editable = "." }
 dependencies = [
     { name = "django-jazzmin" },
     { name = "fast-depends" },
+    { name = "penta" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
     { name = "tomli" },
@@ -1330,6 +1367,7 @@ doc = [
 requires-dist = [
     { name = "django-jazzmin", specifier = ">=3.0.1" },
     { name = "fast-depends", specifier = ">=2.4.12" },
+    { name = "penta", path = "../penta/dist/penta-0.2.1.dev0-py3-none-any.whl" },
     { name = "pydantic", specifier = ">=2.6.1" },
     { name = "pydantic-settings", specifier = ">=2.8.1" },
     { name = "tomli", specifier = ">=2.2.1" },

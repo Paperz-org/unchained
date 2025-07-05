@@ -1,4 +1,4 @@
-from unchained.dependencies.depends import Depends
+from penta.dependencies import Depends
 
 from . import models
 from .unchained import Unchained

@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from unchained import Request
 from unchained.dependencies.custom import BaseCustom
-from unchained.ninja.errors import ValidationError
+from penta.errors import ValidationError
 
 T = TypeVar("T")
 
