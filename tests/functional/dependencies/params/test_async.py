@@ -15,8 +15,8 @@ from unchained import Depends, Unchained
 
 @pytest.fixture
 def client(app: Unchained, async_test_client: UnchainedAsyncTestClient) -> UnchainedAsyncTestClient:
-    async def dependency(param: str) -> str:
-        return param
+    async def dependency(required_param: str) -> str:
+        return required_param
 
     async def dependency_with_default_param(param: str = TEST_DEFAULT_VALUE) -> str:
         return param

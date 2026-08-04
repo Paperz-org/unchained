@@ -4,18 +4,18 @@ import sys
 from pydantic import Field, PrivateAttr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from unchained.settings.django import BaseDjangoSettings, DefaultDjangoSettings
+from unchained.settings.django import DefaultDjangoSettings, MandatoryDjangoSettings
 
 
 class UnchainedSettings(BaseSettings):
-    _django: BaseDjangoSettings = PrivateAttr()
+    _django: MandatoryDjangoSettings = PrivateAttr()
 
     @property
-    def django(self) -> BaseDjangoSettings:
+    def django(self) -> MandatoryDjangoSettings:
         return self._django
 
     @django.setter
-    def django(self, value: BaseDjangoSettings):
+    def django(self, value: MandatoryDjangoSettings):
         self._django = value
 
     SETTINGS_MODULE: str | None = Field(default=None)
@@ -55,7 +55,7 @@ def load_settings() -> UnchainedSettings:
                 continue
             if issubclass(attr_value, UnchainedSettings):
                 unchained_settings.add_settings(attr_value())
-            elif issubclass(attr_value, BaseDjangoSettings):
+            elif issubclass(attr_value, MandatoryDjangoSettings):
                 unchained_settings.django = attr_value()
             elif attr_name.isupper() and not attr_name.startswith("_") and not attr_name.startswith("DJANGO_"):
                 setattr(unchained_settings, attr_name, attr_value)

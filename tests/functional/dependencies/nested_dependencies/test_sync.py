@@ -31,10 +31,10 @@ def client(app: Unchained, test_client: UnchainedTestClient) -> UnchainedTestCli
         return f"{dep1}_{dep2}"
 
     def double_nested_dependency(
-        nested: Annotated[str, Depends(nested_dependency)],
+        nested_result: Annotated[str, Depends(nested_dependency)],
         dep1: Annotated[str, Depends(first_dependency)],
     ) -> str:
-        return f"{nested}_{dep1}"
+        return f"{nested_result}_{dep1}"
 
     def nested_route(result: Annotated[str, Depends(nested_dependency)]) -> str:
         return result

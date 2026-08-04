@@ -1,10 +1,11 @@
 import inspect
 from contextlib import asynccontextmanager, contextmanager
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Callable
 
 from django.db.models import QuerySet
 from django.urls import path
+from penta import FilterSchema, Schema
 
 from unchained import context
 from unchained.admin import UnchainedAdmin
@@ -78,19 +79,19 @@ class Unchained(BaseUnchained, metaclass=UnchainedMeta):
 
     def crud(
         self,
-        model: "BaseModel",
-        create_schema: Any | None = None,
-        read_schema: Any | None = None,
-        update_schema: Any | None = None,
-        filter_schema: Any | None = None,
+        model: type["BaseModel"],
+        create_schema: type[Schema] | None = None,
+        read_schema: type[Schema] | None = None,
+        update_schema: type[Schema] | None = None,
+        filter_schema: type[FilterSchema] | None = None,
         path: str | None = None,
         tags: list[str] | None = None,
         queryset: QuerySet | None = None,
         operations: str = "CRUD",
-    ):
-        from penta.crud import CRUDRouter  # type: ignore
+    ) -> None:
+        from penta.crud import CRUDRouter
 
-        router = CRUDRouter(
+        router: CRUDRouter[BaseModel, Schema, Schema, Schema, FilterSchema] = CRUDRouter(
             model,
             create_schema=create_schema,
             read_schema=read_schema,

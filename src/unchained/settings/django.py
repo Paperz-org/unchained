@@ -50,7 +50,7 @@ class MandatoryDjangoSettings:
         - If OVERRIDE: Use only subclass settings but ensure mandatory fields.
         """
         if cls is MandatoryDjangoSettings:
-            return cls.to_dict()
+            return cls.as_django_settings()
 
         if cls.merge_strategy == MergeStrategy.MERGE:
             final_settings = cls._handle_merge_strategy()

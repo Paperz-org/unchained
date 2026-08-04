@@ -1,3 +1,7 @@
 from contextvars import ContextVar
+from typing import TYPE_CHECKING, Optional
 
-app = ContextVar("app", default=None)
+if TYPE_CHECKING:
+    from unchained.base import BaseUnchained
+
+app: ContextVar[Optional["BaseUnchained"]] = ContextVar("app", default=None)
