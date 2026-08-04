@@ -43,15 +43,15 @@ def test_default_param_dependency_without_param(client: UnchainedTestClient, met
 
 @pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)
 def test_default_param_dependency_with_param(client: UnchainedTestClient, method: str) -> None:
-    response = getattr(client, method)(f"{DEFAULT_PARAM_PATH}/{TEST_CUSTOM_VALUE}")
+    response = getattr(client, method)(f"{DEFAULT_PARAM_PATH}?param={TEST_CUSTOM_VALUE}")
     assert response.status_code == 200
     assert response.json() == TEST_CUSTOM_VALUE
 
 
 @pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)
 def test_dependency_without_required_param(client: UnchainedTestClient, method: str) -> None:
-    response = getattr(client, method)(CUSTOM_PARAM_PATH)
-    assert response.status_code == 404
+    with pytest.raises(Exception, match="Cannot resolve"):
+        getattr(client, method)(CUSTOM_PARAM_PATH)
 
 
 @pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)

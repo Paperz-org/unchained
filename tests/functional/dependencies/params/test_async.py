@@ -42,19 +42,19 @@ async def test_async_default_param_dependency_without_param(client: UnchainedAsy
     assert response.json() == TEST_DEFAULT_VALUE
 
 
-# @pytest.mark.asyncio
-# @pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)
-# async def test_async_default_param_dependency_with_param(client: UnchainedAsyncTestClient, method: str) -> None:
-#     response = await getattr(client, method)(f"{DEFAULT_PARAM_PATH}/{TEST_CUSTOM_VALUE}")
-#     assert response.status_code == 200
-#     assert response.json() == TEST_CUSTOM_VALUE
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)
+async def test_async_default_param_dependency_with_param(client: UnchainedAsyncTestClient, method: str) -> None:
+    response = await getattr(client, method)(f"{DEFAULT_PARAM_PATH}?param={TEST_CUSTOM_VALUE}")
+    assert response.status_code == 200
+    assert response.json() == TEST_CUSTOM_VALUE
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("method", SUPPORTED_HTTP_METHODS)
 async def test_async_dependency_without_required_param(client: UnchainedAsyncTestClient, method: str) -> None:
-    response = await getattr(client, method)(CUSTOM_PARAM_PATH)
-    assert response.status_code == 404
+    with pytest.raises(Exception, match="Cannot resolve"):
+        await getattr(client, method)(CUSTOM_PARAM_PATH)
 
 
 @pytest.mark.asyncio

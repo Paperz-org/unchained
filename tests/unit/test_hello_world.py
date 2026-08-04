@@ -13,10 +13,10 @@ def setup_routes(api: Unchained) -> None:
 
 
 @pytest.fixture
-def api(api: Unchained) -> Unchained:
+def api(app: Unchained) -> Unchained:
     """Set up routes for this test module."""
-    setup_routes(api)
-    return api
+    setup_routes(app)
+    return app
 
 
 @pytest.fixture
