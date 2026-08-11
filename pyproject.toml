@@ -12,7 +12,7 @@ dependencies = [
     "tomli>=2.2.1",
     "pydantic>=2.6.1",
     "pydantic-settings>=2.8.1",
-    "penta>=0.3.0",
+    "penta>=0.4.0",
 ]
 
 authors = [
